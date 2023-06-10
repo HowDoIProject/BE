@@ -1,20 +1,24 @@
 const express = require("express");
 const { Server } = require("http");
-
+const routes = require("./routes");
 const cors = require("cors");
 
 const app = express();
 const http = Server(app);
 
-app.use(cors({
-    origin: "*",
-    methods: "GET, HEAD, POST, PUT, DELETE"
-}));
+app.use(
+    cors({
+        origin: "*",
+        methods: "GET, HEAD, POST, PUT, DELETE",
+    })
+);
 
 app.use(express.json());
 
-app.get('/', async(req, res) => {
-    return res.sendFile(__dirname + '/index.html');
+app.use("/", routes);
+
+app.get("/", async (req, res) => {
+    return res.sendFile(__dirname + "/index.html");
 });
 
 http.listen(3000, () => {
