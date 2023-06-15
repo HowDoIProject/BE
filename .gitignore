@@ -1,3 +1,4 @@
 node_modules/*
 ncp_config.js
 config/*
+.elasticbeanstalk/*
