@@ -23,6 +23,6 @@ app.get("/", async (req, res) => {
     return res.sendFile(__dirname + "/index.html");
 });
 
-http.listen(3000, () => {
-    console.log(3000, "번 포트에서 대기중");
+http.listen(3001, () => {
+    console.log(3001, "번 포트에서 대기중");
 });

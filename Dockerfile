@@ -16,6 +16,6 @@ RUN npm install
 COPY . /app/
 
 # 포트 번호 설정
-EXPOSE 3000
+EXPOSE 3001
 CMD [ "node", "app.js"]
 # commit & push 필수
