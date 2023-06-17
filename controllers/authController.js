@@ -68,7 +68,7 @@ exports.verify = async function (req, res) {
     const verify_code = req.body.verify_code;
 
     const CacheData = Cache.get(user_number);
-
+    
     if (!CacheData) {
         return res.status(500).send({ message: "인증 시간이 만료되었습니다." });
     } else if (CacheData !== verify_code) {
