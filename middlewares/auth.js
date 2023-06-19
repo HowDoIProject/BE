@@ -1,48 +1,83 @@
 const jwt = require("jsonwebtoken");
-const { VerifyToken } = require("../utils/tokenUtils");
+const { Users, Tokens } = require("../models");
+const ACCESS_KEY = "howdoi_";
+const REFRESH_KEY = "howdoi_1";
 
-// dotenv 파일을 통해 시크릿 정보 가저오기
-const secretKey = "howdoi_";
-
-// 사용자 인증 미들웨어
 module.exports = async (req, res, next) => {
   try {
-    // req.header에 토큰 정보가 있는지 확인
-    if (req.headers.authorization === undefined) {
-        return res
-        .status(400)
-        .json({ message: "로그인 후 이용가능합니다." });
+    const { refresh, access } = req.headers;
+    const [accessType, accessToken] = access.split(" ");
+    //토큰타입 검증
+    if (accessType !== "Bearer") {
+      return res
+        .status(401)
+        .json({ message: "토큰 타입이 일치하지 않습니다." });
     }
+    //토큰 유효성 검증
+    const decodedAccess = jwt.verify(accessToken, ACCESS_KEY);
+    const user_id = decodedAccess.user_id
 
-    // 토큰 입력값 검증
-    const token = req.headers.authorization;
-    const [AuthType, AuthToken] = (token ?? "").split(" ");
-    if (!AuthToken || AuthType !== "Bearer") {
+    //액세스 토큰이 검증 됐을 시
+    if (decodedAccess) {
+      //locals 객체에 userId 삽입
+      res.locals.user = user_id;
+      next();
+    } //access Token success end
+    //액세스 토큰 검증에 실패하였을 시
+    if (!user_id) {
+      //refresh 토큰 검증 시작
+      const [refreshType, refreshToken] = refresh.split(" ");
+
+      //리프레시 토큰 타입 검증
+      if (refreshType !== "Bearer") {
         return res
-        .status(400)
-        .json({ message: "로그인 후 이용 가능한 기능입니다.(토큰 형식이 올바르지 않음)" });
-    }
+          .status(401)
+          .json({ message: "토큰 타입이 일치하지 않습니다." });
+      }
 
-    // 토큰 유효성 검증을 위한 객체 생성
-    const verifyToken = new VerifyToken(AuthToken);
+      //리프레시 토큰 유효성 검증
+      const decodedRefresh = jwt.verify(refreshToken, REFRESH_KEY);
+      if (!decodedRefresh) {
+        res.clearCookie("access");
+        res.clearCookie("refresh");
+        return res.status(401).json({ message: "토큰이 유효하지 않습니다" });
+      }
 
-    // 토큰 유효성 검증
-    const isTokenValidate = verifyToken.validateToken();
-    if (!isTokenValidate) {
-        return res
-        .status(400)
-        .json({ message: "로그인 후 이용 가능한 기능입니다.(유효성 검사 실패)" });
-    }
+      //db자료와 대조
+      const dbCheck = await Tokens.findOne(
+        {},
+        {
+          where: { [Op.and]: [{ accessToken }, { refreshToken }] },
+        }
+      );
 
-    // 토큰 Decode -> 토큰의 payload에 닮긴 user 정보 추출
-    const user = jwt.verify(AuthToken, secretKey);
-
-    res.locals.user = user;
-    next();
-  } catch (err) {
-    console.error(err);
+      //db자료가 있다면 access token db update 후 access 토큰 발급
+      if (dbCheck) {
+        const uid = decodedRefresh["user_id"];
+        const updateToken = jwt.sign({ uid }, ACCESS_KEY, { expiresIn: "1h" });
+        await Tokens.update(
+          {
+            accessToken: updateToken,
+          },
+          {
+            where: { refreshToken },
+          }
+        );
+        res.json({"access": `Bearer ${updateToken}`});
+        //locals 객체에 userId 삽입
+        res.locals.user = user_id;
+        next();
+      } //tokens db check success
+      else {
+        return res.status(400).json({ message: "로그인이 필요한 기능입니다." });
+      }
+    } //refresh Token success
+  } catch (error) {
+    //try
+    console.log(error);
     return res.status(400).json({
-      message: "기타 오류",
+      message: "로그인이 필요한 기능입니다.",
     });
-  }
+    
+  } //catch
 };

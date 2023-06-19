@@ -1,11 +1,15 @@
 const express = require("express");
 const router = express.Router();
-const { Users } = require("../models");
+const { Op } = require("sequelize");
+const { Users, Tokens } = require("../models");
 const number = require("../middlewares/number");
 const bcrypt = require("bcrypt");
 const user = require("../controllers/authController"); //본인인증
-const UsersController = require("../controllers/usersController") //로그인
-const usersController = new UsersController();
+const ACCESS_KEY = 'howdoi_'
+const REFRESH_KEY = 'howdoi_1'
+
+// const UsersController = require("../controllers/usersController") //로그인
+// const usersController = new UsersController();
 
 //회원가입
 router.post("/signup", number, async (req, res) => {
@@ -17,7 +21,7 @@ router.post("/signup", number, async (req, res) => {
         password,
         password_confirm,
     } = req.body;
-    const verification = req.cookies.verification;
+    const verification = req.headers.verification;
 
     try {
         //문자인증한 이후 전화번호를 수정하여 가입 시도한 경우
@@ -103,6 +107,37 @@ router.post("/send", user.send);
 router.post("/verify", user.verify);
 
 //로그인
-router.post("/login", usersController.login);
+router.post("/login", async (req, res) => {
+    try {
+      //이메일 패스워드 받아오기
+      let { user_number, password } = req.body;
+
+      //db 확인
+      const hashedPassword = await Users.findOne({
+        attributes: ["password"],
+        where: { [Op.and]: [{ user_number }] },
+        raw: true,
+      });
+      
+      if (!bcrypt.compareSync(password,hashedPassword.password)) {
+        return res.status(400).json({ message: "회원 정보가 일치하지 않습니다" });
+      }
+      //토큰 발행
+      const refreshToken = jwt.sign({}, REFRESH_KEY, { expiresIn: "1d" });
+      const accessToken = jwt.sign({ user_id }, ACCESS_KEY, { expiresIn: "1h" });
+      await Tokens.create({
+        refreshToken,
+        accessToken,
+      });
+  
+      return res
+        .status(200)
+        .json({ message: "Token이 정상적으로 발급되었습니다.", access: `Bearer ${accessToken}`, refresh: `Bearer ${refreshToken}`});
+    } catch (e) {
+      //try
+      return res.status(400).json({ message: "일치하지 않습니다" });
+    } //catch
+  }); //end
+
 
 module.exports = router;

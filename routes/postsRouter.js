@@ -1,56 +1,40 @@
 const express = require("express");
 const router = express.Router();
 const multer = require("multer");
-const fs = require("fs");
-const path = require("path");
-const AWS = require("aws-sdk");
 const multerS3 = require("multer-s3");
+const shortId = require("shortid");
+const AWS = require("aws-sdk");
 
-const PostsController = require("../controllers/postsController");
-const postsController = new PostsController();
+//const { S3Client } = require("@aws-sdk/client-s3");
 
-// 이미지 업로드용 라우터
-try {
-    // 폴더 저장 경로가 존재하지 않는 경우 폴더 만들어주기
-    fs.accessSync("uploads");
-} catch (err) {
-    console.error("uploads 폴더가 없어 uploads 폴더를 생성합니다");
-    fs.mkdirSync("uploads");
-}
-
-AWS.config.update({
-    accesskeyId: process.env.S3_ACCESS_KEY_ID,
+const s3 = new AWS.S3({
+    accessKeyId: process.env.S3_ACCESS_KEY_ID,
     secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,
-    region: "ap-northeast-2",
 });
 
-const uploads = multer({
-    dest: "uploads/",
+const upload = multer({
     storage: multerS3({
-        s3: new AWS.S3(),
-        bucket: "elasticbeanstalk-ap-northeast-2-235120449577",
+        s3,
+        bucket: "howdoi-project",
         contentType: multerS3.AUTO_CONTENT_TYPE,
-        acl: "public-read-write",
-        key: (req, file, cb) => {
-            cb(
-                null,
-                `original/${Date.now()}${path.basename(file.originalname)}`
-            );
+        key: function (req, file, cb) {
+            const fileId = shortId.generate();
+            const type = file.mimetype.split("/")[1];
+            const fileName = `${fileId}.${type}`;
+            cb(null, fileName);
         },
+        acl: "public-read-write",
     }),
-    limits: { fileSize: 5 * 1024 * 1024 },
 });
 
-router.post(
-    "/uploads",
-    uploads.single("image"),
-    postsController.upload,
-    (req, res) => {
-        console.log(req.file);
-        res.json({ url: req.file.location });
+router.post("/uploads", upload.single("image"), async (req, res, next) => {
+    try {
+        res.status(200).json({ result: "ok" });
+    } catch (error) {
+        next(error);
     }
-);
+});
 
-router.post("/post", postsController.write);
+//router.post("/post", postsController.write);
 
 module.exports = router;
