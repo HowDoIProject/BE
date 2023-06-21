@@ -3,6 +3,7 @@ const router = express.Router();
 const { Op } = require("sequelize");
 const { Users, Tokens } = require("../models");
 const number = require("../middlewares/number");
+const jwt = require("jsonwebtoken")
 const bcrypt = require("bcrypt");
 const user = require("../controllers/authController"); //본인인증
 const ACCESS_KEY = 'howdoi_'
@@ -118,24 +119,33 @@ router.post("/login", async (req, res) => {
         where: { [Op.and]: [{ user_number }] },
         raw: true,
       });
-      
+
       if (!bcrypt.compareSync(password,hashedPassword.password)) {
         return res.status(400).json({ message: "회원 정보가 일치하지 않습니다" });
       }
+      console.log(bcrypt.compareSync(password,hashedPassword.password))
+      
+      const nickname = await Users.findOne({
+        attributes: ["nickname"],
+        where: { [Op.and]: [{ user_number }] },
+        raw: true,
+      });
+
       //토큰 발행
       const refreshToken = jwt.sign({}, REFRESH_KEY, { expiresIn: "1d" });
-      const accessToken = jwt.sign({ user_id }, ACCESS_KEY, { expiresIn: "1h" });
+      const accessToken = jwt.sign({ nickname }, ACCESS_KEY, { expiresIn: "1h" });
       await Tokens.create({
         refreshToken,
         accessToken,
       });
-  
+      
+      console.log(refreshToken)
       return res
         .status(200)
         .json({ message: "Token이 정상적으로 발급되었습니다.", access: `Bearer ${accessToken}`, refresh: `Bearer ${refreshToken}`});
     } catch (e) {
       //try
-      return res.status(400).json({ message: "일치하지 않습니다" });
+      return res.status(400).json({ message: "일치하지 않습니다" + e });
     } //catch
   }); //end
 

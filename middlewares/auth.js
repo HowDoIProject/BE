@@ -15,16 +15,16 @@ module.exports = async (req, res, next) => {
     }
     //토큰 유효성 검증
     const decodedAccess = jwt.verify(accessToken, ACCESS_KEY);
-    const user_id = decodedAccess.user_id
+    const nickname = decodedAccess.nickname
 
     //액세스 토큰이 검증 됐을 시
     if (decodedAccess) {
       //locals 객체에 userId 삽입
-      res.locals.user = user_id;
+      res.locals.user = nickname;
       next();
     } //access Token success end
     //액세스 토큰 검증에 실패하였을 시
-    if (!user_id) {
+    if (!nickname) {
       //refresh 토큰 검증 시작
       const [refreshType, refreshToken] = refresh.split(" ");
 
@@ -53,8 +53,8 @@ module.exports = async (req, res, next) => {
 
       //db자료가 있다면 access token db update 후 access 토큰 발급
       if (dbCheck) {
-        const uid = decodedRefresh["user_id"];
-        const updateToken = jwt.sign({ uid }, ACCESS_KEY, { expiresIn: "1h" });
+        const nick = decodedRefresh["nickname"];
+        const updateToken = jwt.sign({ nick }, ACCESS_KEY, { expiresIn: "1h" });
         await Tokens.update(
           {
             accessToken: updateToken,
@@ -65,7 +65,7 @@ module.exports = async (req, res, next) => {
         );
         res.json({"access": `Bearer ${updateToken}`});
         //locals 객체에 userId 삽입
-        res.locals.user = user_id;
+        res.locals.user = nickname;
         next();
       } //tokens db check success
       else {
