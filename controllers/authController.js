@@ -1,4 +1,4 @@
-const secret_key = require("../ncp_config");
+const secret_key = require("../config/ncp_config");
 
 const axios = require("axios");
 const Cache = require("memory-cache");
