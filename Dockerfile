@@ -1,6 +1,6 @@
 # 사용할 베이스 이미지
 FROM node:18
-
+# RUN npm install -g yarn
 # 작업 디렉토리 생성 괴정
 RUN mkdir -p /app
 
@@ -10,7 +10,7 @@ WORKDIR /app
 COPY package*.json /app/
 
 # 종속성 설치
-RUN npm install
+RUN yarn install
 
 # 파일 복사
 COPY . /app/
