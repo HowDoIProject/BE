@@ -1,6 +1,4 @@
 node_modules/*
-ncp_config.js
-config/*
 # Elastic Beanstalk Files
 .elasticbeanstalk/*
 !.elasticbeanstalk/*.cfg.yml
