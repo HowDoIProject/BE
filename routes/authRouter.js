@@ -26,7 +26,7 @@ router.post("/signup", number, async (req, res) => {
 
     try {
         //문자인증한 이후 전화번호를 수정하여 가입 시도한 경우
-        if (verification != user_number) {
+        if (Number(verification) !== Number(user_number)) {
             return res
                 .status(403)
                 .json({ message: "인증된 번호로 가입하십시오." });
@@ -131,15 +131,20 @@ router.post("/login", async (req, res) => {
         raw: true,
       });
 
+      const user_id = await Users.findOne({
+        attributes: ["user_id"],
+        where: { [Op.and]: [{ user_number }] },
+        raw: true,
+      });
+
       //토큰 발행
       const refreshToken = jwt.sign({}, REFRESH_KEY, { expiresIn: "1d" });
-      const accessToken = jwt.sign({ nickname }, ACCESS_KEY, { expiresIn: "1h" });
+      const accessToken = jwt.sign({ user_id, nickname }, ACCESS_KEY, { expiresIn: "1h" });
       await Tokens.create({
         refreshToken,
         accessToken,
       });
       
-      console.log(refreshToken)
       return res
         .status(200)
         .json({ message: "Token이 정상적으로 발급되었습니다.", access: `Bearer ${accessToken}`, refresh: `Bearer ${refreshToken}`});
