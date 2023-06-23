@@ -26,7 +26,7 @@ router.post("/signup", number, async (req, res) => {
 
     try {
         //문자인증한 이후 전화번호를 수정하여 가입 시도한 경우
-        if (verification !== user_number) {
+        if (Number(verification) !== Number(user_number)) {
             return res
                 .status(403)
                 .json({ message: "인증된 번호로 가입하십시오." });

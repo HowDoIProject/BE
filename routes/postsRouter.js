@@ -5,7 +5,8 @@ const multerS3 = require("multer-s3");
 const shortId = require("shortid");
 const AWS = require("aws-sdk");
 const auth = require("../middlewares/auth");
-const postsController = require("../controllers/postsController");
+const PostsController = require("../controllers/postsController");
+const postsController = new PostsController();
 
 const s3 = new AWS.S3({
     accessKeyId: process.env.S3_ACCESS_KEY_ID,
@@ -35,6 +36,6 @@ router.post("/uploads", auth, upload.single("image"), async (req, res, next) => 
     }
 });
 
-//router.post("/post", auth, postsController.write);
+router.post("/post", auth, postsController.write);
 
 module.exports = router;
