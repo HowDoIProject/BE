@@ -4,8 +4,7 @@ const multer = require("multer");
 const multerS3 = require("multer-s3");
 const shortId = require("shortid");
 const AWS = require("aws-sdk");
-
-//const { S3Client } = require("@aws-sdk/client-s3");
+const auth = require("../middlewares/auth")
 
 const s3 = new AWS.S3({
     accessKeyId: process.env.S3_ACCESS_KEY_ID,
@@ -27,7 +26,7 @@ const upload = multer({
     }),
 });
 
-router.post("/uploads", upload.single("image"), async (req, res, next) => {
+router.post("/uploads", auth, upload.single("image"), async (req, res, next) => {
     try {
         res.status(200).json({ result: "ok" });
     } catch (error) {
@@ -35,6 +34,6 @@ router.post("/uploads", upload.single("image"), async (req, res, next) => {
     }
 });
 
-//router.post("/post", postsController.write);
+router.post("/post", auth, postsController.write);
 
 module.exports = router;
