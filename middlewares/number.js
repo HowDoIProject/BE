@@ -1,7 +1,7 @@
 module.exports = async (req, res, next) => {
   try {
-    const verification = req.headers.cookie;
-    console.log(req.headers.cookie);
+    const verification = req.headers.verification;
+    console.log(req.headers.verification);
     // # 403 Cookie가 존재하지 않을 경우
     if (!verification) {
       return res
