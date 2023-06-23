@@ -22,7 +22,7 @@ router.post("/signup", number, async (req, res) => {
         password,
         password_confirm,
     } = req.body;
-    const verification = req.headers.verification;
+    const verification = req.cookies.verification;
 
     try {
         //문자인증한 이후 전화번호를 수정하여 가입 시도한 경우
