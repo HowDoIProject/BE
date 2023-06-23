@@ -4,7 +4,8 @@ const multer = require("multer");
 const multerS3 = require("multer-s3");
 const shortId = require("shortid");
 const AWS = require("aws-sdk");
-const auth = require("../middlewares/auth")
+const auth = require("../middlewares/auth");
+const postsController = require("../controllers/postsController");
 
 const s3 = new AWS.S3({
     accessKeyId: process.env.S3_ACCESS_KEY_ID,
