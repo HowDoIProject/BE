@@ -35,6 +35,6 @@ router.post("/uploads", auth, upload.single("image"), async (req, res, next) => 
     }
 });
 
-router.post("/post", auth, postsController.write);
+//router.post("/post", auth, postsController.write);
 
 module.exports = router;
