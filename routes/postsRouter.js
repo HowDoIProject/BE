@@ -34,7 +34,10 @@ router.post("/uploads", auth, upload, async (req, res, next) => {
 router.post("/post", auth, async (req, res) => {
     const { nickname } = res.locals.user;
     const { user_id } = res.locals.id;
-    const { title, content, category, image } = req.body;
+    const { title, content, category } = req.body;
+    const image = req.file;
+    const imageFileName = image.filename;
+
 
     if (!title || !content) {
         return res.status(400).json({ message: "다시 한 번 확인해주세요" });
@@ -44,7 +47,7 @@ router.post("/post", auth, async (req, res) => {
             nickname,
             title,
             content,
-            image,
+            image :imageFileName,
             category,
         }).then((data) => {
             return res.status(200).json({
