@@ -5,7 +5,7 @@ const multerS3 = require("multer-s3");
 const shortId = require("shortid");
 const AWS = require("aws-sdk");
 const auth = require("../middlewares/auth");
-const {Posts} = require("../models")
+const { Posts, Users, Categories, sequelize } = require("../models");
 
 const s3 = new AWS.S3({
     accessKeyId: process.env.S3_ACCESS_KEY_ID,
@@ -31,13 +31,13 @@ router.post("/uploads", auth, upload, async (req, res, next) => {
     res.json({ url: req.file.location });
 });
 
-router.post("/post", auth, async (req, res) => {
+router.post("/post", auth, upload, async (req, res) => {
     const { nickname } = res.locals.user;
     const { user_id } = res.locals.id;
     const { title, content, category } = req.body;
     const image = req.file;
-    const imageFileName = image.filename;
-
+    console.log(image)
+    const imageFileName = image.file.location;
 
     if (!title || !content) {
         return res.status(400).json({ message: "다시 한 번 확인해주세요" });
@@ -47,13 +47,54 @@ router.post("/post", auth, async (req, res) => {
             nickname,
             title,
             content,
-            image :imageFileName,
+            image: imageFileName,
             category,
         }).then((data) => {
             return res.status(200).json({
                 message: "게시글이 올라갔습니다",
             });
         });
+    }
+});
+
+router.get("/post", async (req, res) => {
+    try {
+        // 게시글 목록 조회
+        const posts = await Posts.findAll({
+            attributes: [
+                "post_id",
+                "user_id",
+                [sequelize.col("nickname"), "nickname"],
+                "title",
+                "content",
+                "image",
+                "category",
+                "created_at",
+                "updated_at",
+            ],
+            include: [
+                {
+                    model: Users,
+                    attributes: [],
+                },
+            ],
+            group: ["Posts.post_id"],
+            order: [["created_at", "DESC"]],
+            raw: true,
+        });
+
+        // 작성된 게시글이 없을 경우
+        if (posts.length === 0) {
+            return res
+                .status(400)
+                .json({ message: "작성된 게시글이 없습니다." });
+        }
+        // 게시글 목록 조회
+        return res.status(200).json({ posts });
+    } catch (e) {
+        // 예외 처리
+        console.log(e);
+        return res.status(400).json({ message: "목록 조회에 실패했습니다." });
     }
 });
 

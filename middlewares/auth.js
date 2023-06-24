@@ -17,12 +17,16 @@ module.exports = async (req, res, next) => {
     const decodedAccess = jwt.verify(accessToken, ACCESS_KEY);
     const nickname = decodedAccess.nickname
     const user_id = decodedAccess.user_id
+    const user_type = decodedAccess.user_type
+
 
     //액세스 토큰이 검증 됐을 시
     if (decodedAccess) {
       //locals 객체에 삽입
       res.locals.user = nickname;
-      res.locals.id = user_id
+      res.locals.id = user_id;
+      res.locals.type = user_type;
+
       next();
     } //access Token success end
     //액세스 토큰 검증에 실패하였을 시
@@ -57,7 +61,9 @@ module.exports = async (req, res, next) => {
       if (dbCheck) {
         const nick = decodedRefresh["nickname"];
         const id = decodedRefresh["user_id"];
-        const updateToken = jwt.sign({ id, nick }, ACCESS_KEY, { expiresIn: "1h" });
+        const type = decodedRefresh["user_type"];
+
+        const updateToken = jwt.sign({ id, nick, type }, ACCESS_KEY, { expiresIn: "1h" });
         await Tokens.update(
           {
             accessToken: updateToken,
@@ -70,6 +76,7 @@ module.exports = async (req, res, next) => {
         //locals 객체에 userId 삽입
         res.locals.user = nickname;
         res.locals.id = user_id;
+        res.locals.id = user_type;
 
         next();
       } //tokens db check success

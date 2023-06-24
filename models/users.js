@@ -9,10 +9,10 @@ module.exports = (sequelize, DataTypes) => {
          */
         static associate(models) {
             // define association here
-            this.belongsTo(models.Categories, {
-                targetKey: 'category',
-                foreignKey: 'category',
-            })
+            // this.belongsTo(models.Categories, {
+            //     targetKey: 'category',
+            //     foreignKey: 'category',
+            // })
             this.hasMany(models.Posts, {
                 targetKey: 'user_id',
                 foreignKey: 'user_id'

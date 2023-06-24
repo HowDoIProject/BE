@@ -137,9 +137,15 @@ router.post("/login", async (req, res) => {
         raw: true,
       });
 
+      const user_type = await Users.findOne({
+        attributes: ["user_type"],
+        where: { [Op.and]: [{ user_number }] },
+        raw: true,
+      });
+
       //토큰 발행
       const refreshToken = jwt.sign({}, REFRESH_KEY, { expiresIn: "1d" });
-      const accessToken = jwt.sign({ user_id, nickname }, ACCESS_KEY, { expiresIn: "1h" });
+      const accessToken = jwt.sign({ user_id, nickname, user_type }, ACCESS_KEY, { expiresIn: "1h" });
       await Tokens.create({
         refreshToken,
         accessToken,

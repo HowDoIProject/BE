@@ -25,6 +25,10 @@ module.exports = {
         allowNull: true,
         type: Sequelize.STRING
       },
+      category: {
+        allowNull: true,
+        type: Sequelize.INTEGER
+      },
       scrap_num: {
         allowNull: true,
         defaultValue: 0,

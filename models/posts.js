@@ -13,6 +13,10 @@ module.exports = (sequelize, DataTypes) => {
                 targetKey: 'user_id',
                 foreignKey: 'user_id'
             }),
+            // this.belongsTo(models.Categories, {
+            //     targetKey: 'category',
+            //     foreignKey: 'category'
+            // }),
             this.hasMany(models.Comments, {
                 targetKey: 'post_id',
                 foreignKey: 'post_id'
@@ -50,6 +54,10 @@ module.exports = (sequelize, DataTypes) => {
             image: {
                 allowNull: true,
                 type: Sequelize.STRING,
+            },
+            category: {
+                allowNull: false,
+                type: Sequelize.INTEGER,
             },
             scrap_num: {
                 allowNull: true,

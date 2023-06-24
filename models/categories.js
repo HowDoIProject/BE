@@ -9,10 +9,14 @@ module.exports = (sequelize, DataTypes) => {
          */
         static associate(models) {
             // define association here
-            this.hasMany(models.Users, {
-                targetKey: "category",
-                foreignKey: "category",
-            });
+            // this.hasMany(models.Users, {
+            //     targetKey: "category",
+            //     foreignKey: "category",
+            // }),
+            // this.hasMany(models.Posts, {
+            //     targetKey: "category",
+            //     foreignKey: "category",
+            // });
         }
     }
     Categories.init(
