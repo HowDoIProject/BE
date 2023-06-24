@@ -5,6 +5,7 @@ const multerS3 = require("multer-s3");
 const shortId = require("shortid");
 const AWS = require("aws-sdk");
 const auth = require("../middlewares/auth");
+const {Posts} = require("../models")
 
 const s3 = new AWS.S3({
     accessKeyId: process.env.S3_ACCESS_KEY_ID,
@@ -27,20 +28,14 @@ const upload = multer({
 }).single("image");
 
 router.post("/uploads", auth, upload, async (req, res, next) => {
-    try {
-        const image_url = await req.file.location;
-        res.status(200).json({ result: "ok" });
-    } catch (error) {
-        next(error);
-    }
+    res.json({ url: req.file.location });
 });
 
-router.post("/post", auth, upload, async (req, res) => {
+router.post("/post", auth, async (req, res) => {
     const { nickname } = res.locals.user;
     const { user_id } = res.locals.id;
-    const { title, content, category } = req.body;
-    const image_url = await req.file.location;
-    
+    const { title, content, category, image } = req.body;
+
     if (!title || !content) {
         return res.status(400).json({ message: "다시 한 번 확인해주세요" });
     } else {
@@ -49,7 +44,7 @@ router.post("/post", auth, upload, async (req, res) => {
             nickname,
             title,
             content,
-            image: image_url,
+            image,
             category,
         }).then((data) => {
             return res.status(200).json({
