@@ -76,7 +76,7 @@ module.exports = async (req, res, next) => {
         //locals 객체에 userId 삽입
         res.locals.user = nickname;
         res.locals.id = user_id;
-        res.locals.id = user_type;
+        res.locals.type = user_type;
 
         next();
       } //tokens db check success
@@ -88,7 +88,7 @@ module.exports = async (req, res, next) => {
     //try
     console.log(error);
     return res.status(400).json({
-      message: "로그인이 필요한 기능입니다.",
+      message: "로그인이 필요한 기능입니다. 예외처리",
     });
     
   } //catch
