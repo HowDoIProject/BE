@@ -19,6 +19,8 @@ router.post("/signup", number, async (req, res) => {
         user_number,
         nickname,
         category,
+        age,
+        gender,
         password,
         password_confirm,
     } = req.body;

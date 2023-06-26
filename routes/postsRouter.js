@@ -31,13 +31,13 @@ router.post("/uploads", auth, upload, async (req, res, next) => {
     res.json({ url: req.file.location });
 });
 
-router.post("/post", auth, upload, async (req, res) => {
+router.post("/post", auth, async (req, res) => {
     const { nickname } = res.locals.user;
     const { user_id } = res.locals.id;
-    const { title, content, category } = req.body;
-    const image = req.file;
-    console.log(image)
-    const imageFileName = image.file.location;
+    const { title, content, category, image } = req.body;
+    // const image = req.file;
+    // console.log(image)
+    // const imageFileName = image.file.location;
 
     if (!title || !content) {
         return res.status(400).json({ message: "다시 한 번 확인해주세요" });
@@ -47,7 +47,7 @@ router.post("/post", auth, upload, async (req, res) => {
             nickname,
             title,
             content,
-            image: imageFileName,
+            image,
             category,
         }).then((data) => {
             return res.status(200).json({
@@ -69,6 +69,8 @@ router.get("/post", async (req, res) => {
                 "content",
                 "image",
                 "category",
+                "scrap_num",
+                "like_num",
                 "created_at",
                 "updated_at",
             ],
