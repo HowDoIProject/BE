@@ -27,7 +27,7 @@ const upload = multer({
     }),
 }).single("image");
 
-router.post("/uploads", auth, upload, async (req, res, next) => {
+router.post("/uploads", upload, async (req, res, next) => {
     res.json({ url: req.file.location });
 });
 
