@@ -88,6 +88,8 @@ router.post("/signup", number, async (req, res) => {
             user_number,
             nickname,
             category,
+            age,
+            gender,
         });
 
         console.log("회원가입 완료");
