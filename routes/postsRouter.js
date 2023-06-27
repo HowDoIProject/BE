@@ -170,10 +170,9 @@ router.get("/post/topfive", async (req, res) => {
 //추천 게시글 조회
 // router.get("/recommend", auth, async (req, res) => {
 //     try {
-//         const user_id = res.locals.id
-//         res.locals.user = nickname;
-//         res.locals.id = user_id;
-//         res.locals.type = user_type;
+//         const user_id = res.locals.id;
+//         const nickname = res.locals.user;
+//         const user_type = res.locals.type;
   
 //         // 게시글 목록 조회
 //         const recommend = await Posts.findAll({
