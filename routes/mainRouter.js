@@ -49,7 +49,7 @@ router.get("/post", async (req, res) => {
 });
 
 //top5 게시글 조회
-router.get("/post/topfive", async (req, res) => {
+router.get("/topfive", async (req, res) => {
     try {
         // 게시글 목록 조회
         const d = new Date();
