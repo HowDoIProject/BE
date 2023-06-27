@@ -102,7 +102,7 @@ router.put("/post/:post_id/comment/:comment_id", auth, async (req, res) => {
         const { user_id } = res.locals.id;
         const { comment, image } = req.body;
         const { post_id, comment_id } = req.params;
-        
+
         const targetPost = await Posts.findOne({ where: { post_id } });
         if (!targetPost) {
             return res
@@ -124,12 +124,15 @@ router.put("/post/:post_id/comment/:comment_id", auth, async (req, res) => {
         if (!comment) {
             return res.status(400).json({ message: "다시 한 번 확인해주세요" });
         } else {
-            await Comments.update({
-                post_id,
-                user_id,
-                comment,
-                image,
-            }).then((data) => {
+            await Comments.update(
+                {
+                    comment: comment,
+                    image: image,
+                },
+                {
+                    where: { comment_id: comment_id },
+                }
+            ).then((data) => {
                 return res.status(200).json({
                     message: "댓글 수정이 완료되었습니다.",
                 });
