@@ -5,7 +5,7 @@ const multerS3 = require("multer-s3");
 const shortId = require("shortid");
 const AWS = require("aws-sdk");
 const auth = require("../middlewares/auth");
-const { Posts, Users, Comments,  sequelize } = require("../models");
+const { Posts, Users, Comments, PostsLikes, PostsScraps, sequelize } = require("../models");
 const { Op } = require("sequelize");
 
 const s3 = new AWS.S3({
@@ -38,46 +38,6 @@ router.post("/post", auth, async (req, res) => {
     const { nickname } = res.locals.user;
     const { user_id } = res.locals.id;
     const { title, content, category, image } = req.body;
-    // const image = req.file;
-    // console.log(image)
-    // const imageFileName = image.file.location;
-
-    // const category_one = parseInt(category / 100);
-    // const category_two = parseInt((category - category_one*100) / 10)
-    // const category_three = parseInt((category - category_one*100 - category_two *10))
-    // let category_str = [];
-    // if( category_one !== 0) {
-    //     const category_str_1 = await Categories.findOne({
-    //         attributes: [
-    //             "category_name"
-    //         ],
-    //         where: { category : category_one},
-    //         raw: true
-    //     })
-    //     category_str.push(category_str_1.category_name);
-    // }
-    // if( category_two !== 0) {
-    //     const category_str_2 = await Categories.findOne({
-    //         attributes: [
-    //             "category_name"
-    //         ],
-    //         where: { category : category_two},
-    //         raw: true
-    //     })
-    //     category_str.push(category_str_2.category_name);
-
-    // }
-    // if( category_three !== 0) {
-    //     const category_str_3 = await Categories.findOne({
-    //         attributes: [
-    //             "category_name"
-    //         ],
-    //         where: { category : category_three},
-    //         raw: true
-    //     })
-    //     category_str.push(category_str_3.category_name);
-    // }
-    // console.log(category_str)
 
     if (!title || !content) {
         return res.status(400).json({ message: "다시 한 번 확인해주세요" });
@@ -165,4 +125,89 @@ router.get("/post/:post_id", async (req, res) => {
         return res.status(400).json({ message: "게시글 조회에 실패했습니다." });
     }
 });
+
+router.post("/like/:post_id", auth, async (req, res) => {
+    try{
+        const  user_id  = res.locals.id;
+        const { post_id } = req.params;
+        likes = await PostsLikes.findAll({
+            attributes: [
+                "post_id",
+                "user_id",
+            ],
+            where: {user_id: user_id.user_id},
+            raw: true,
+        });
+
+        if(likes.length !== 0){
+            await PostsLikes.destroy({
+                where: {
+                    user_id: user_id.user_id,
+                    post_id
+                }
+            }).then((data) => {
+                return res.status(200).json({
+                    message: "좋아요가 취소되었습니다.",
+                });
+            });
+        } else {
+            await PostsLikes.create({
+                user_id: user_id.user_id,
+                post_id,
+            }).then((data) => {
+                return res.status(200).json({
+                    message: "좋아요가 완료되었습니다.",
+                });
+            });
+    
+        }
+
+    }catch (error){
+        console.log(error)
+        return res.status(400).json({ message: "댓글 삭제에 실패했습니다." + error });
+    }
+})
+
+router.post("/scrap/:post_id", auth, async (req, res) => {
+    try{
+        const  user_id  = res.locals.id;
+        const { post_id } = req.params;
+
+        likes = await PostsScraps.findAll({
+            attributes: [
+                "post_id",
+                "user_id",
+            ],
+            where: {user_id: user_id.user_id},
+            raw: true,
+        });
+
+        if(likes.length !== 0){
+            await PostsScraps.destroy({
+                where: {
+                    user_id: user_id.user_id,
+                    post_id
+                }
+            }).then((data) => {
+                return res.status(200).json({
+                    message: "좋아요가 취소되었습니다.",
+                });
+            });
+        } else {
+            await PostsScraps.create({
+                user_id: user_id.user_id,
+                post_id,
+            }).then((data) => {
+                return res.status(200).json({
+                    message: "좋아요가 완료되었습니다.",
+                });
+            });
+    
+        }
+
+    }catch (error){
+        console.log(error)
+        return res.status(400).json({ message: "댓글 삭제에 실패했습니다." + error });
+    }
+})
 module.exports = router;
