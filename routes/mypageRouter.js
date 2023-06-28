@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const auth = require("../middlewares/auth");
-const { Posts, Users, Categories, sequelize } = require("../models");
+const { Posts, Users, sequelize } = require("../models");
 const { Op } = require("sequelize");
 
 router.get("/mypage", auth, async (req, res) => {
@@ -44,8 +44,7 @@ router.get("/mypage", auth, async (req, res) => {
         return res.status(200).json({ mypage });
     } catch (e) {
         // 예외 처리
-        console.log(e);
-        return res.status(400).json({ message: "목록 조회에 실패했습니다." });
+        return res.status(400).json({ message: "목록 조회에 실패했습니다." + e });
     }
 });
 module.exports = router;

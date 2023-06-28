@@ -27,7 +27,7 @@ module.exports = {
       },
       category: {
         allowNull: true,
-        type: Sequelize.INTEGER
+        type: Sequelize.STRING
       },
       scrap_num: {
         allowNull: true,
