@@ -1,13 +1,12 @@
 const express = require("express");
 const router = express.Router();
 const auth = require("../middlewares/auth");
-const { Posts, Users, sequelize } = require("../models");
+const { Posts, Users, Comments, sequelize } = require("../models");
 const { Op } = require("sequelize");
 
 router.get("/mypage", auth, async (req, res) => {
     try {
         const user_id = res.locals.id
-        console.log(user_id.user_id)
         // 게시글 목록 조회
         const mypage = await Posts.findAll({
             attributes: [
@@ -111,4 +110,43 @@ router.get("/mypages/:page", async (req, res, next) => {
     //return res.status(200).json({ VideoList: temp});
   });
   
+  //내가 작성한 댓글
+  router.get("/mycomment", auth, async (req, res) => {
+    try {
+        const user_id = res.locals.id
+        // 게시글 목록 조회
+        const mycomment = await Comments.findAll({
+            attributes: [
+                "comment_id",
+                "user_id",
+                "comment",
+                "image",
+                [sequelize.col("category"), "category"],
+                "created_at",
+                "updated_at",
+            ],
+            where: {user_id: user_id.user_id},
+            include: [
+                {
+                    model: Posts,
+                    attributes: [],
+                },
+            ],
+            order: [["created_at", "DESC"]],
+            raw: true,
+        });
+
+        // 작성된 게시글이 없을 경우
+        if (mycomment.length === 0) {
+            return res
+                .status(400)
+                .json({ message: "작성된 댓글이 없습니다." });
+        }
+        // 게시글 목록 조회
+        return res.status(200).json({ mycomment });
+    } catch (e) {
+        // 예외 처리
+        return res.status(400).json({ message: "목록 조회에 실패했습니다." + e });
+    }
+});
 module.exports = router;
