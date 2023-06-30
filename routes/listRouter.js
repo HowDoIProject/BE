@@ -4,8 +4,9 @@ const auth = require("../middlewares/auth");
 const { Posts, Users, sequelize } = require("../models");
 const { Op } = require("sequelize");
 
-router.get("/list/:filter/:category", async (req, res) => {
+router.get("/list/:filter/:category/:page", async (req, res) => {
     try {
+        const { page } = req.params;
         let { filter, category } = req.params;
         if (filter === "0" && category === "0") {
             // 게시글 목록 조회
@@ -30,9 +31,44 @@ router.get("/list/:filter/:category", async (req, res) => {
                     },
                 ],
                 order: [["created_at", "DESC"]],
+                offset: (page - 1) * 10,
+                limit: 10,
                 raw: true,
             });
-            return res.status(200).json({ list });
+
+            const result = [];
+            console.log(list);
+            list.forEach((item) => {
+                const scroll_result = {
+                    post_id: item.post_id,
+                    user_id: item.user_id,
+                    nickname: item.nickname,
+                    title: item.title,
+                    content: item.content,
+                    image: item.image,
+                    category: item.category,
+                    scrap_num: item.scrap_num,
+                    like_num: item.like_num,
+                    created_at: item.created_at,
+                    updated_at: item.updated_at,
+                };
+                result.push(scroll_result);
+            });
+
+            const total_count = await Posts.count();
+            const total_page = Math.ceil(total_count / 10);
+            const last_page = total_page == page ? true : false;
+            //VideoListResult.push({ last_page: last_page });
+            //VideoListResult.push({ total_page: total_page });
+            const Result_Json = JSON.stringify(result);
+
+            const temp = JSON.parse(`${Result_Json}`);
+            return res.status(200).json({
+                mypage: temp,
+                page: page,
+                last_page: last_page,
+                total_page: total_page,
+            });
         } else if (filter === "0" && category !== "0") {
             if (category === "1") {
                 category = "생활비";
@@ -64,9 +100,44 @@ router.get("/list/:filter/:category", async (req, res) => {
                     },
                 ],
                 order: [["created_at", "DESC"]],
+                offset: (page - 1) * 10,
+                limit: 10,
                 raw: true,
             });
-            return res.status(200).json({ list });
+
+            const result = [];
+            console.log(list);
+            list.forEach((item) => {
+                const scroll_result = {
+                    post_id: item.post_id,
+                    user_id: item.user_id,
+                    nickname: item.nickname,
+                    title: item.title,
+                    content: item.content,
+                    image: item.image,
+                    category: item.category,
+                    scrap_num: item.scrap_num,
+                    like_num: item.like_num,
+                    created_at: item.created_at,
+                    updated_at: item.updated_at,
+                };
+                result.push(scroll_result);
+            });
+
+            const total_count = await Posts.count();
+            const total_page = Math.ceil(total_count / 10);
+            const last_page = total_page == page ? true : false;
+            //VideoListResult.push({ last_page: last_page });
+            //VideoListResult.push({ total_page: total_page });
+            const Result_Json = JSON.stringify(result);
+
+            const temp = JSON.parse(`${Result_Json}`);
+            return res.status(200).json({
+                mypage: temp,
+                page: page,
+                last_page: last_page,
+                total_page: total_page,
+            });
         } else if (filter !== "0" && category === "0") {
             if (filter === "1") {
                 filter = "강아지";
@@ -87,20 +158,55 @@ router.get("/list/:filter/:category", async (req, res) => {
                     "created_at",
                     "updated_at",
                 ],
-                where: {  },
+                where: {},
                 include: [
                     {
                         model: Users,
                         attributes: [],
                         where: {
-                            user_type:filter
-                        }
+                            user_type: filter,
+                        },
                     },
                 ],
                 order: [["created_at", "DESC"]],
+                offset: (page - 1) * 10,
+                limit: 10,
                 raw: true,
             });
-            return res.status(200).json({ list });
+
+            const result = [];
+            console.log(list);
+            list.forEach((item) => {
+                const scroll_result = {
+                    post_id: item.post_id,
+                    user_id: item.user_id,
+                    nickname: item.nickname,
+                    title: item.title,
+                    content: item.content,
+                    image: item.image,
+                    category: item.category,
+                    scrap_num: item.scrap_num,
+                    like_num: item.like_num,
+                    created_at: item.created_at,
+                    updated_at: item.updated_at,
+                };
+                result.push(scroll_result);
+            });
+
+            const total_count = await Posts.count();
+            const total_page = Math.ceil(total_count / 10);
+            const last_page = total_page == page ? true : false;
+            //VideoListResult.push({ last_page: last_page });
+            //VideoListResult.push({ total_page: total_page });
+            const Result_Json = JSON.stringify(result);
+
+            const temp = JSON.parse(`${Result_Json}`);
+            return res.status(200).json({
+                mypage: temp,
+                page: page,
+                last_page: last_page,
+                total_page: total_page,
+            });
         } else {
             if (filter === "1") {
                 filter = "강아지";
@@ -136,22 +242,51 @@ router.get("/list/:filter/:category", async (req, res) => {
                         model: Users,
                         attributes: [],
                         where: {
-                            user_type:filter
-                        }
+                            user_type: filter,
+                        },
                     },
                 ],
                 order: [["created_at", "DESC"]],
+                offset: (page - 1) * 10,
+                limit: 10,
                 raw: true,
             });
-            return res.status(200).json({ list });
+
+            const result = [];
+            console.log(list);
+            list.forEach((item) => {
+                const scroll_result = {
+                    post_id: item.post_id,
+                    user_id: item.user_id,
+                    nickname: item.nickname,
+                    title: item.title,
+                    content: item.content,
+                    image: item.image,
+                    category: item.category,
+                    scrap_num: item.scrap_num,
+                    like_num: item.like_num,
+                    created_at: item.created_at,
+                    updated_at: item.updated_at,
+                };
+                result.push(scroll_result);
+            });
+
+            const total_count = await Posts.count();
+            const total_page = Math.ceil(total_count / 10);
+            const last_page = total_page == page ? true : false;
+            //VideoListResult.push({ last_page: last_page });
+            //VideoListResult.push({ total_page: total_page });
+            const Result_Json = JSON.stringify(result);
+
+            const temp = JSON.parse(`${Result_Json}`);
+            return res.status(200).json({
+                mypage: temp,
+                page: page,
+                last_page: last_page,
+                total_page: total_page,
+            });
         }
 
-        // 작성된 게시글이 없을 경우
-        // if (list.length === 0) {
-        //     return res
-        //         .status(400)
-        //         .json({ message: "작성된 게시글이 없습니다." });
-        // }
         // 게시글 목록 조회
     } catch (e) {
         // 예외 처리
@@ -159,68 +294,6 @@ router.get("/list/:filter/:category", async (req, res) => {
             .status(400)
             .json({ message: "목록 조회에 실패했습니다." + e });
     }
-});
-
-router.get("/lists/:page", async (req, res, next) => {
-    console.log("무한스크롤 리스트 조회 API 호출됨");
-    const { page } = req.params;
-    const list = await Posts.findAll({
-        attributes: [
-            "post_id",
-            "user_id",
-            [sequelize.col("nickname"), "nickname"],
-            "title",
-            "content",
-            "image",
-            "category",
-            "scrap_num",
-            "like_num",
-            "created_at",
-            "updated_at",
-        ],
-        include: [
-            {
-                model: Users,
-                attributes: [],
-            },
-        ],
-        order: [["created_at", "DESC"]],
-        offset: (page - 1) * 10,
-        limit: 10,
-        raw: true,
-    });
-
-    const result = [];
-    console.log(list);
-    list.forEach((item) => {
-        const scroll_result = {
-            post_id: item.post_id,
-            user_id: item.user_id,
-            nickname: item.nickname,
-            title: item.title,
-            content: item.content,
-            image: item.image,
-            category: item.category,
-            scrap_num: item.scrap_num,
-            like_num: item.like_num,
-            created_at: item.created_at,
-            updated_at: item.updated_at,
-        };
-        result.push(scroll_result);
-    });
-
-    const total_count = await Posts.count();
-    const total_page = Math.ceil(total_count / 10);
-    const last_page = total_page == page ? true : false;
-    //VideoListResult.push({ last_page: last_page });
-    //VideoListResult.push({ total_page: total_page });
-    const Result_Json = JSON.stringify(result);
-
-    const temp = JSON.parse(`${Result_Json}`);
-    return res
-        .status(200)
-        .json({ mypage: temp, last_page: last_page, total_page: total_page });
-    //return res.status(200).json({ VideoList: temp});
 });
 
 module.exports = router;
