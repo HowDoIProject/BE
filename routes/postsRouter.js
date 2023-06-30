@@ -65,7 +65,7 @@ router.post("/post", auth, async (req, res) => {
 });
 
 //게시글 수정
-router.put("/post/:id", auth, async (req, res) => {
+router.put("/mypage/:id", auth, async (req, res) => {
     try {
         const { nickname } = res.locals.user;
         const { user_id } = res.locals.id;
@@ -105,7 +105,7 @@ router.put("/post/:id", auth, async (req, res) => {
 });
 
 //게시글 삭제
-router.delete("/post/:id", auth, async (req, res) => {
+router.delete("/mypage/:id", auth, async (req, res) => {
     try {
         const { nickname } = res.locals.user;
         const { user_id } = res.locals.id;
