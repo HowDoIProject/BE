@@ -34,11 +34,12 @@ router.post("/uploads", upload, async (req, res, next) => {
 });
 
 //댓글 작성
-router.post("/post/:post_id/comment", auth, async (req, res) => {
+router.post("/post/:id/comment", auth, async (req, res) => {
     try {
         const { user_id } = res.locals.id;
         const { comment, image } = req.body;
-        const { post_id } = req.params;
+        const { id } = req.params;
+        const post_id = Number(id);
 
         if (!comment) {
             return res.status(400).json({ message: "다시 한 번 확인해주세요" });
@@ -61,10 +62,12 @@ router.post("/post/:post_id/comment", auth, async (req, res) => {
 });
 
 //댓글 삭제
-router.delete("/post/:post_id/comment/:comment_id", auth, async (req, res) => {
+router.delete("/post/:p_id/comment/:c_id", auth, async (req, res) => {
     try {
         const { user_id } = res.locals.id;
-        const { post_id, comment_id } = req.params;
+        const { p_id, c_id } = req.params;
+        const post_id = Number(p_id);
+        const comment_id = Number(c_id);
 
         const targetPost = await Posts.findOne({ where: { post_id } });
         if (!targetPost) {
@@ -97,11 +100,14 @@ router.delete("/post/:post_id/comment/:comment_id", auth, async (req, res) => {
     }
 });
 
-router.put("/post/:post_id/comment/:comment_id", auth, async (req, res) => {
+router.put("/post/:p_id/comment/:c_id", auth, async (req, res) => {
     try {
         const { user_id } = res.locals.id;
         const { comment, image } = req.body;
-        const { post_id, comment_id } = req.params;
+        const { p_id, c_id } = req.params;
+        const post_id = Number(p_id);
+        const comment_id = Number(c_id);
+
 
         const targetPost = await Posts.findOne({ where: { post_id } });
         if (!targetPost) {

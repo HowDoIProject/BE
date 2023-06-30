@@ -65,10 +65,11 @@ router.post("/post", auth, async (req, res) => {
 });
 
 //게시글 상세 조회
-router.get("/post/:post_id", async (req, res) => {
+router.get("/post/:id", async (req, res) => {
     try {
         // params로 postId 받기
-        const { post_id } = req.params;
+        const { id } = req.params;
+        const post_id = Number(id);
         // 게시글 상세 조회
         const post = await Posts.findOne({
             attributes: [
@@ -135,11 +136,11 @@ router.get("/post/:post_id", async (req, res) => {
     }
 });
 
-router.post("/like/:post_id", auth, async (req, res) => {
+router.post("/like/:id", auth, async (req, res) => {
     try {
         const user_id = res.locals.id;
-        const { post_id } = req.params;
-
+        const { id } = req.params;
+        const post_id = Number(id);
         likes = await PostsLikes.findAll({
             attributes: ["post_id", "user_id"],
             where: { post_id, user_id: user_id.user_id },
@@ -179,10 +180,9 @@ router.post("/like/:post_id", auth, async (req, res) => {
                 like_num: like_num.length,
             },
             {
-                where: { post_id:post_id },
+                where: { post_id: post_id },
             }
         );
-        
     } catch (error) {
         console.log(error);
         return res
@@ -191,11 +191,11 @@ router.post("/like/:post_id", auth, async (req, res) => {
     }
 });
 
-router.post("/scrap/:post_id", auth, async (req, res) => {
+router.post("/scrap/:id", auth, async (req, res) => {
     try {
         const user_id = res.locals.id;
-        const { post_id } = req.params;
-
+        const { id } = req.params;
+        const post_id = Number(id);
         scraps = await PostsScraps.findAll({
             attributes: ["post_id", "user_id"],
             where: { user_id: user_id.user_id },
@@ -234,11 +234,9 @@ router.post("/scrap/:post_id", auth, async (req, res) => {
                 scrap_num: scrap_num.length,
             },
             {
-                where: { post_id:post_id },
+                where: { post_id: post_id },
             }
         );
-        
-
     } catch (error) {
         console.log(error);
         return res
