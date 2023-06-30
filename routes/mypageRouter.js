@@ -48,7 +48,7 @@ router.get("/mypage", auth, async (req, res) => {
     }
 });
 
-router.get("/mypage/:page", async (req, res, next) => {
+router.get("/mypages/:page", async (req, res, next) => {
     console.log("무한스크롤 리스트 조회 API 호출됨");
     const { page } = req.params;
     const mypage = await Posts.findAll({

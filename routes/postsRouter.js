@@ -64,6 +64,78 @@ router.post("/post", auth, async (req, res) => {
     }
 });
 
+//게시글 수정
+router.put("/post/:id", auth, async (req, res) => {
+    try {
+        const { nickname } = res.locals.user;
+        const { user_id } = res.locals.id;
+        const { title, content, category, image } = req.body;
+        const { id } = req.params;
+        const post_id = Number(id);
+
+        const targetPost = await Posts.findOne({ where: { post_id } });
+        if (!targetPost) {
+            return res
+                .status(400)
+                .json({ message: "유효하지 않은 게시글입니다." });
+        }
+
+        if (targetPost.user_id !== user_id) {
+            return res.status(400).json({ message: "권한이 없습니다." });
+        }
+
+        await Posts.update(
+            {
+                title,
+                content,
+                category,
+                image: image,
+            },
+            {
+                where: { post_id },
+            }
+        ).then((data) => {
+            return res.status(200).json({
+                message: "게시글 수정이 완료되었습니다.",
+            });
+        });
+    } catch (error) {
+        return res.status(400).json({ message: "게시글 수정에 실패했습니다." });
+    }
+});
+
+//게시글 삭제
+router.delete("/post/:id", auth, async (req, res) => {
+    try {
+        const { nickname } = res.locals.user;
+        const { user_id } = res.locals.id;
+        const { title, content, category, image } = req.body;
+        const { id } = req.params;
+        const post_id = Number(id);
+
+        const targetPost = await Posts.findOne({ where: { post_id } });
+        if (!targetPost) {
+            return res
+                .status(400)
+                .json({ message: "유효하지 않은 게시글입니다." });
+        }
+
+        if (targetPost.user_id !== user_id) {
+            return res.status(400).json({ message: "권한이 없습니다." });
+        }
+
+        await Posts.destroy({
+            where: { post_id },
+        }).then((data) => {
+            return res.status(200).json({
+                message: "게시글 삭제가 완료되었습니다.",
+            });
+        });
+    } catch (error) {
+        return res.status(400).json({ message: "게시글 삭제에 실패했습니다." });
+    }
+});
+
 //게시글 상세 조회
 router.get("/post/:id", async (req, res) => {
     try {
@@ -136,6 +208,7 @@ router.get("/post/:id", async (req, res) => {
     }
 });
 
+//게시글 도움됐어요
 router.post("/like/:id", auth, async (req, res) => {
     try {
         const user_id = res.locals.id;
@@ -191,6 +264,7 @@ router.post("/like/:id", auth, async (req, res) => {
     }
 });
 
+//게시글 스크랩
 router.post("/scrap/:id", auth, async (req, res) => {
     try {
         const user_id = res.locals.id;

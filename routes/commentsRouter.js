@@ -127,23 +127,20 @@ router.put("/post/:p_id/comment/:c_id", auth, async (req, res) => {
             return res.status(400).json({ message: "권한이 없습니다." });
         }
 
-        if (!comment) {
-            return res.status(400).json({ message: "다시 한 번 확인해주세요" });
-        } else {
-            await Comments.update(
-                {
-                    comment: comment,
-                    image: image,
-                },
-                {
-                    where: { comment_id: comment_id },
-                }
-            ).then((data) => {
-                return res.status(200).json({
-                    message: "댓글 수정이 완료되었습니다.",
-                });
+        await Comments.update(
+            {
+                comment: comment,
+                image: image,
+            },
+            {
+                where: { comment_id: comment_id },
+            }
+        ).then((data) => {
+            return res.status(200).json({
+                message: "댓글 수정이 완료되었습니다.",
             });
-        }
+        });
+
     } catch (error) {
         console.log(error);
         return res.status(400).json({ message: "댓글 수정에 실패했습니다." });
