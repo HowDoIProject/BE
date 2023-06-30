@@ -65,7 +65,7 @@ router.get("/list/:filter/:category/:page", async (req, res) => {
             const temp = JSON.parse(`${Result_Json}`);
             return res.status(200).json({
                 mypage: temp,
-                page: page,
+                page: Number(page),
                 last_page: last_page,
                 total_page: total_page,
             });
@@ -134,7 +134,7 @@ router.get("/list/:filter/:category/:page", async (req, res) => {
             const temp = JSON.parse(`${Result_Json}`);
             return res.status(200).json({
                 mypage: temp,
-                page: page,
+                page: Number(page),
                 last_page: last_page,
                 total_page: total_page,
             });
@@ -203,7 +203,7 @@ router.get("/list/:filter/:category/:page", async (req, res) => {
             const temp = JSON.parse(`${Result_Json}`);
             return res.status(200).json({
                 mypage: temp,
-                page: page,
+                page: Number(page),
                 last_page: last_page,
                 total_page: total_page,
             });
@@ -281,7 +281,7 @@ router.get("/list/:filter/:category/:page", async (req, res) => {
             const temp = JSON.parse(`${Result_Json}`);
             return res.status(200).json({
                 mypage: temp,
-                page: page,
+                page: Number(page),
                 last_page: last_page,
                 total_page: total_page,
             });
