@@ -108,7 +108,6 @@ router.put("/post/:p_id/comment/:c_id", auth, async (req, res) => {
         const post_id = Number(p_id);
         const comment_id = Number(c_id);
 
-
         const targetPost = await Posts.findOne({ where: { post_id } });
         if (!targetPost) {
             return res
@@ -140,10 +139,82 @@ router.put("/post/:p_id/comment/:c_id", auth, async (req, res) => {
                 message: "댓글 수정이 완료되었습니다.",
             });
         });
-
     } catch (error) {
         console.log(error);
         return res.status(400).json({ message: "댓글 수정에 실패했습니다." });
+    }
+});
+
+router.post("/post/:p_id/comment/:c_id", auth, async (req, res) => {
+    try {
+        const { user_id } = res.locals.id;
+        const { p_id, c_id } = req.params;
+        const post_id = Number(p_id);
+        const comment_id = Number(c_id);
+
+        const targetPost = await Posts.findOne({ where: { post_id } });
+        if (!targetPost) {
+            return res
+                .status(400)
+                .json({ message: "유효하지 않은 게시글입니다." });
+        }
+
+        const targetComment = await Comments.findOne({ where: { comment_id } });
+        if (!targetComment) {
+            return res
+                .status(400)
+                .json({ message: "유효하지 않은 댓글입니다." });
+        }
+
+        if (targetComment.user_id !== user_id) {
+            return res.status(400).json({ message: "권한이 없습니다." });
+        }
+
+        const chosen_comments = await Comments.findAll({
+            attributes: [
+                "comment_id",
+                "post_id",
+                "user_id",
+                [sequelize.col("nickname"), "nickname"],
+                "comment",
+                "image",
+                "chosen",
+                "created_at",
+                "updated_at",
+            ],
+            where: { post_id, chosen: 1 },
+            include: [
+                {
+                    model: Users,
+                    attributes: [],
+                },
+            ],
+            order: [["created_at", "DESC"]],
+            raw: true,
+        });
+        if (chosen_comments.length !== 0) {
+            return res
+                .status(400)
+                .json({ message: "이미 채택된 답변이 존재합니다. " });
+        } else {
+            await Comments.update(
+                {
+                    chosen: 1,
+                },
+                {
+                    where: { post_id, comment_id },
+                }
+            ).then((data) => {
+                return res.status(200).json({
+                    message: "채택이 완료되었습니다.",
+                });
+            });
+        }
+    } catch (error) {
+        console.log(error);
+        return res
+            .status(400)
+            .json({ message: "채택에 실패했습니다." + error });
     }
 });
 module.exports = router;

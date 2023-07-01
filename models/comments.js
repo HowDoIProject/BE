@@ -43,6 +43,10 @@ module.exports = (sequelize, DataTypes) => {
                 allowNull: true,
                 type: Sequelize.STRING,
             },
+            chosen: {
+                allowNull: true,
+                type: Sequelize.INTEGER,
+            },
             created_at: {
                 allowNull: false,
                 type: Sequelize.DATE,

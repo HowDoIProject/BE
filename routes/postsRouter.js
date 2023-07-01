@@ -318,4 +318,5 @@ router.post("/scrap/:id", auth, async (req, res) => {
             .json({ message: "스크랩에 실패했습니다." + error });
     }
 });
+
 module.exports = router;
