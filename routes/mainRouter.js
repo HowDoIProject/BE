@@ -111,13 +111,92 @@ router.get("/topfive", async (req, res) => {
     }
 });
 
+//검색기능
+router.post("/search/:keyword/:page", async (req, res, next) => {
+    const keyword = req.params.keyword;
+    const { page } = req.params;
+
+    const post_search = await Posts.findAll({
+        attributes: [
+            "post_id",
+            "user_id",
+            [sequelize.col("nickname"), "nickname"],
+            [sequelize.col("user_type"), "user_type"],
+            "title",
+            "content",
+            "image",
+            "category",
+            "scrap_num",
+            "like_num",
+            "created_at",
+            "updated_at",
+        ],
+        include: [
+            {
+                model: Users,
+                attributes: [],
+            },
+        ],
+        where: {
+            [Op.or]: [
+                {
+                    title: {
+                        [Op.like]: "%" + keyword + "%",
+                    },
+                },
+                {
+                    content: {
+                        [Op.like]: "%" + keyword + "%",
+                    },
+                },
+            ],
+        },
+        order: [["created_at", "DESC"]],
+        offset: (page - 1) * 10,
+        limit: 10,
+        raw: true,
+    });
+    const result = [];
+    post_search.forEach((item) => {
+        const scroll_result = {
+            post_id: item.post_id,
+            user_id: item.user_id,
+            nickname: item.nickname,
+            user_type: item.user_type,
+            title: item.title,
+            content: item.content,
+            image: item.image,
+            category: item.category,
+            like_num: item.like_num,
+            scrap_num: item.scrap_num,
+            created_at: item.created_at,
+            updated_at: item.updated_at,
+        };
+        result.push(scroll_result);
+    });
+    const total_count = await Posts.count();
+    const total_page = Math.ceil(total_count / 10);
+    const last_page = total_page == page ? true : false;
+
+    const Result_Json = JSON.stringify(result);
+    const temp = JSON.parse(`${Result_Json}`);
+    return res
+        .status(200)
+        .json({
+            result: temp,
+            page: Number(page),
+            last_page: last_page,
+            total_page: total_page,
+        });
+});
+
 //추천 게시글 조회
 // router.get("/recommend", auth, async (req, res) => {
 //     try {
 //         const user_id = res.locals.id;
 //         const nickname = res.locals.user;
 //         const user_type = res.locals.type;
-  
+
 //         // 게시글 목록 조회
 //         const recommend = await Posts.findAll({
 //             attributes: [
