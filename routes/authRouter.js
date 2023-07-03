@@ -149,7 +149,7 @@ router.post("/login", async (req, res) => {
 
       //토큰 발행
       const refreshToken = jwt.sign({}, REFRESH_KEY, { expiresIn: "1d" });
-      const accessToken = jwt.sign({ user_id, nickname, user_type }, ACCESS_KEY, { expiresIn: "1h" });
+      const accessToken = jwt.sign({ user_id, nickname, user_type }, ACCESS_KEY, { expiresIn: "1d" });
       await Tokens.create({
         refreshToken,
         accessToken,
