@@ -274,7 +274,7 @@ router.post("/scrap/:id", auth, async (req, res) => {
         const post_id = Number(id);
         scraps = await PostsScraps.findAll({
             attributes: ["post_id", "user_id"],
-            where: { user_id: user_id.user_id },
+            where: { post_id, user_id: user_id.user_id },
             raw: true,
         });
 

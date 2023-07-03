@@ -1,37 +1,23 @@
 const express = require("express");
 const router = express.Router();
 const auth = require("../middlewares/auth");
-const { Posts, Users, sequelize } = require("../models");
+const { Posts, Users, Comments, PostsScraps, sequelize } = require("../models");
 const { Op } = require("sequelize");
 
-router.get("/list/:filter/:category/:page", async (req, res) => {
+router.get("/scrap/:filter/:category/:page", async (req, res) => {
     try {
         const { page } = req.params;
         let { filter, category } = req.params;
         if (filter === "0" && category === "0") {
             // 게시글 목록 조회
-            const list = await Posts.findAll({
-                attributes: [
-                    "post_id",
-                    "user_id",
-                    [sequelize.col("nickname"), "nickname"],
-                    [sequelize.col("user_type"), "user_type"],
-                    "title",
-                    "content",
-                    "image",
-                    "category",
-                    "scrap_num",
-                    "like_num",
-                    "created_at",
-                    "updated_at",
-                ],
+            const list = await PostsScraps.findAll({
                 include: [
                     {
-                        model: Users,
-                        attributes: [],
+                        model: Posts,
+                        attributes: ['title','content','image','category','scrap_num','like_num','created_at','updated_at'],
                     },
                 ],
-                order: [["created_at", "DESC"]],
+                order: [["post_id", "DESC"]],
                 offset: (page - 1) * 10,
                 limit: 10,
                 raw: true,
@@ -301,5 +287,6 @@ router.get("/list/:filter/:category/:page", async (req, res) => {
             .json({ message: "목록 조회에 실패했습니다." + e });
     }
 });
+
 
 module.exports = router;

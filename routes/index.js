@@ -5,6 +5,7 @@ const mypageRouter = require("./mypageRouter");
 const commentsRouter = require("./commentsRouter");
 const authRouter = require("./authRouter");
 const listRouter = require("./listRouter");
+const scrapsRouter = require("./scrapsRouter");
 
 const router = express();
 
@@ -15,6 +16,7 @@ router.use("/api", [
     commentsRouter,
     authRouter,
     listRouter,
+    scrapsRouter,
 ]);
 
 module.exports = router;
