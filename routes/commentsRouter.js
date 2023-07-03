@@ -88,7 +88,7 @@ router.delete("/post/:p_id/comment/:c_id", auth, async (req, res) => {
         }
 
         await Comments.destroy({
-            where: { post_id },
+            where: { post_id, comment_id },
         }).then((data) => {
             return res.status(200).json({
                 message: "댓글 삭제가 완료되었습니다.",
