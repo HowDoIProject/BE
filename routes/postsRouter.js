@@ -111,7 +111,6 @@ router.delete("/mypage/:id", auth, async (req, res) => {
     try {
         const { nickname } = res.locals.user;
         const { user_id } = res.locals.id;
-        const { title, content, category, image } = req.body;
         const { id } = req.params;
         const post_id = Number(id);
 
