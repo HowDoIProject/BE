@@ -33,6 +33,8 @@ const upload = multer({
         },
         acl: "public-read-write",
     }),
+
+    limits: { fileSize: 8 * 1024 * 1024 }
 }).single("image");
 
 //사진 업로드
