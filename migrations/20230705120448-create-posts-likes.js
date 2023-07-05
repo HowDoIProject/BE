@@ -14,9 +14,13 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       post_id: {
-        allowNull: false,
+        allowNull: true,
         type: Sequelize.INTEGER
       },
+      comment_id: {
+        allowNull: true,
+        type: Sequelize.INTEGER
+      }
     });
   },
   async down(queryInterface, Sequelize) {

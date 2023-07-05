@@ -178,7 +178,10 @@ router.get("/post/:id", async (req, res) => {
                 [sequelize.col("user_type"), "user_type"],
                 "comment",
                 "image",
+                "chosen",
+                "like_num",
                 "created_at",
+                "updated_at",
             ],
             where: { post_id },
             include: [

@@ -5,7 +5,7 @@ const multerS3 = require("multer-s3");
 const shortId = require("shortid");
 const AWS = require("aws-sdk");
 const auth = require("../middlewares/auth");
-const { Posts, Users, Comments, sequelize } = require("../models");
+const { Posts, Users, Comments, PostsLikes, sequelize } = require("../models");
 const { Op } = require("sequelize");
 
 const s3 = new AWS.S3({
@@ -100,6 +100,7 @@ router.delete("/post/:p_id/comment/:c_id", auth, async (req, res) => {
     }
 });
 
+//댓글 수정
 router.put("/post/:p_id/comment/:c_id", auth, async (req, res) => {
     try {
         const { user_id } = res.locals.id;
@@ -145,6 +146,7 @@ router.put("/post/:p_id/comment/:c_id", auth, async (req, res) => {
     }
 });
 
+//댓글 채택
 router.post("/post/:p_id/comment/:c_id", auth, async (req, res) => {
     try {
         const { user_id } = res.locals.id;
@@ -217,4 +219,61 @@ router.post("/post/:p_id/comment/:c_id", auth, async (req, res) => {
             .json({ message: "채택에 실패했습니다." + error });
     }
 });
+
+//댓글 도움됐어요
+router.post("/commentlike/:id", auth, async (req, res) => {
+    try {
+        const user_id = res.locals.id;
+        const { id } = req.params;
+        const comment_id = Number(id);
+        likes = await PostsLikes.findAll({
+            attributes: ["comment_id", "user_id"],
+            where: { comment_id, user_id: user_id.user_id },
+            raw: true,
+        });
+
+        if (likes.length !== 0) {
+            await PostsLikes.destroy({
+                where: {
+                    user_id: user_id.user_id,
+                    comment_id,
+                },
+            }).then((data) => {
+                return res.status(200).json({
+                    message: "좋아요가 취소되었습니다.",
+                });
+            });
+        } else {
+            await PostsLikes.create({
+                user_id: user_id.user_id,
+                comment_id,
+            }).then((data) => {
+                return res.status(200).json({
+                    message: "좋아요가 완료되었습니다.",
+                });
+            });
+        }
+
+        like_num = await PostsLikes.findAll({
+            attributes: ["comment_id", "user_id"],
+            where: { comment_id },
+            raw: true,
+        });
+
+        await Comments.update(
+            {
+                like_num: like_num.length,
+            },
+            {
+                where: { comment_id: comment_id },
+            }
+        );
+    } catch (error) {
+        console.log(error);
+        return res
+            .status(400)
+            .json({ message: "좋아요에 실패했습니다." + error });
+    }
+});
+
 module.exports = router;

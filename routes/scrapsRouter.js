@@ -4,17 +4,36 @@ const auth = require("../middlewares/auth");
 const { Posts, Users, Comments, PostsScraps, sequelize } = require("../models");
 const { Op } = require("sequelize");
 
-router.get("/scrap/:filter/:category/:page", async (req, res) => {
+router.get("/scrap/:filter/:category/:page", auth, async (req, res) => {
     try {
+        const user_id = res.locals.id;
         const { page } = req.params;
         let { filter, category } = req.params;
         if (filter === "0" && category === "0") {
             // 게시글 목록 조회
-            const list = await PostsScraps.findAll({
+            const list = await Posts.findAll({
+                attributes: [
+                    "post_id",
+                    "user_id",
+                    // [sequelize.col("nickname"), "nickname"],
+                    // [sequelize.col("user_type"), "user_type"],
+                    "title",
+                    "content",
+                    "image",
+                    "category",
+                    "scrap_num",
+                    "like_num",
+                    "created_at",
+                    "updated_at",
+                ],
                 include: [
                     {
-                        model: Posts,
-                        attributes: ['title','content','image','category','scrap_num','like_num','created_at','updated_at'],
+                        model: Users,
+                        include: [{ model: PostsScraps }]
+                    },
+                    {
+                        model: PostsScraps,
+                        where: {user_id:user_id.user_id}
                     },
                 ],
                 order: [["post_id", "DESC"]],
@@ -24,7 +43,6 @@ router.get("/scrap/:filter/:category/:page", async (req, res) => {
             });
 
             const result = [];
-            console.log(list);
             list.forEach((item) => {
                 const scroll_result = {
                     post_id: item.post_id,
@@ -98,8 +116,8 @@ router.get("/scrap/:filter/:category/:page", async (req, res) => {
                 const scroll_result = {
                     post_id: item.post_id,
                     user_id: item.user_id,
-                    nickname: item.nickname,
-                    user_type: item.user_type,
+                    nickname: item.list.nickname,
+                    user_type: item.list.user_type,
                     title: item.title,
                     content: item.content,
                     image: item.image,
