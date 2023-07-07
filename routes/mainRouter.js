@@ -180,23 +180,51 @@ router.post("/search/:keyword/:page", async (req, res, next) => {
 
     const Result_Json = JSON.stringify(result);
     const temp = JSON.parse(`${Result_Json}`);
-    return res
-        .status(200)
-        .json({
-            result: temp,
-            page: Number(page),
-            last_page: last_page,
-            total_page: total_page,
-        });
+    return res.status(200).json({
+        result: temp,
+        page: Number(page),
+        last_page: last_page,
+        total_page: total_page,
+    });
 });
 
 //추천 게시글 조회
 router.get("/recommend", auth, async (req, res) => {
     try {
-        const user_id = res.locals.id;
-        const nickname = res.locals.user;
-        const user_type = res.locals.type;
+        const d = new Date();
 
+        const year = d.getFullYear();
+        const month = d.getMonth();
+        const day = d.getDate();
+
+        const { user_id } = res.locals.id;
+        const { nickname } = res.locals.user;
+        const { user_type } = res.locals.type;
+
+        const { age } = await Users.findOne({
+            attributes: ["age"],
+            where: { user_id },
+            raw: true,
+        });
+
+        // 비슷한 회원 검색
+        const target_user = await Users.findAll({
+            where: { 
+                user_type,
+                age,
+                user_id: {
+                    [Op.ne]: user_id
+                }
+             },
+            raw: true,
+        });
+        console.log(target_user.length);
+
+        if (target_user.length === 0){
+            const recommend = await Posts.findAll({
+
+            })
+        }
         // 게시글 목록 조회
         const recommend = await Posts.findAll({
             attributes: [

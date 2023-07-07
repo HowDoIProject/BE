@@ -77,6 +77,31 @@ router.get("/list/:filter/:category/:page", async (req, res) => {
             } else if (category === "3") {
                 category = "집안일";
             }
+            const pages = await Posts.findAll({
+                attributes: [
+                    "post_id",
+                    "user_id",
+                    [sequelize.col("nickname"), "nickname"],
+                    [sequelize.col("user_type"), "user_type"],
+                    "title",
+                    "content",
+                    "image",
+                    "category",
+                    "scrap_num",
+                    "like_num",
+                    "created_at",
+                    "updated_at",
+                ],
+                where: { category },
+                include: [
+                    {
+                        model: Users,
+                        attributes: [],
+                    },
+                ],
+                order: [["created_at", "DESC"]],
+                raw: true,
+            });
 
             const list = await Posts.findAll({
                 attributes: [
@@ -107,7 +132,7 @@ router.get("/list/:filter/:category/:page", async (req, res) => {
             });
 
             const result = [];
-            console.log(list);
+
             list.forEach((item) => {
                 const scroll_result = {
                     post_id: item.post_id,
@@ -126,11 +151,8 @@ router.get("/list/:filter/:category/:page", async (req, res) => {
                 result.push(scroll_result);
             });
 
-            const total_count = await Posts.count();
-            const total_page = Math.ceil(total_count / 10);
+            const total_page = Math.ceil(pages.length / 10);
             const last_page = total_page == page ? true : false;
-            //VideoListResult.push({ last_page: last_page });
-            //VideoListResult.push({ total_page: total_page });
             const Result_Json = JSON.stringify(result);
 
             const temp = JSON.parse(`${Result_Json}`);
@@ -140,12 +162,43 @@ router.get("/list/:filter/:category/:page", async (req, res) => {
                 last_page: last_page,
                 total_page: total_page,
             });
+            
         } else if (filter !== "0" && category === "0") {
             if (filter === "1") {
                 filter = "강아지";
             } else if (filter === "2") {
                 filter = "엄빠";
             }
+            
+            const pages = await Posts.findAll({
+                attributes: [
+                    "post_id",
+                    "user_id",
+                    [sequelize.col("nickname"), "nickname"],
+                    [sequelize.col("user_type"), "user_type"],
+                    "title",
+                    "content",
+                    "image",
+                    "category",
+                    "scrap_num",
+                    "like_num",
+                    "created_at",
+                    "updated_at",
+                ],
+                where: {},
+                include: [
+                    {
+                        model: Users,
+                        attributes: [],
+                        where: {
+                            user_type: filter,
+                        },
+                    },
+                ],
+                order: [["created_at", "DESC"]],
+                raw: true,
+            });
+
             const list = await Posts.findAll({
                 attributes: [
                     "post_id",
@@ -197,11 +250,8 @@ router.get("/list/:filter/:category/:page", async (req, res) => {
                 result.push(scroll_result);
             });
 
-            const total_count = await Posts.count();
-            const total_page = Math.ceil(total_count / 10);
+            const total_page = Math.ceil(pages.length / 10);
             const last_page = total_page == page ? true : false;
-            //VideoListResult.push({ last_page: last_page });
-            //VideoListResult.push({ total_page: total_page });
             const Result_Json = JSON.stringify(result);
 
             const temp = JSON.parse(`${Result_Json}`);
@@ -225,6 +275,35 @@ router.get("/list/:filter/:category/:page", async (req, res) => {
             } else if (category === "3") {
                 category = "집안일";
             }
+
+            const pages = await Posts.findAll({
+                attributes: [
+                    "post_id",
+                    "user_id",
+                    [sequelize.col("nickname"), "nickname"],
+                    [sequelize.col("user_type"), "user_type"],
+                    "title",
+                    "content",
+                    "image",
+                    "category",
+                    "scrap_num",
+                    "like_num",
+                    "created_at",
+                    "updated_at",
+                ],
+                where: { category },
+                include: [
+                    {
+                        model: Users,
+                        attributes: [],
+                        where: {
+                            user_type: filter,
+                        },
+                    },
+                ],
+                order: [["created_at", "DESC"]],
+                raw: true,
+            });
 
             const list = await Posts.findAll({
                 attributes: [
@@ -277,11 +356,8 @@ router.get("/list/:filter/:category/:page", async (req, res) => {
                 result.push(scroll_result);
             });
 
-            const total_count = await Posts.count();
-            const total_page = Math.ceil(total_count / 10);
+            const total_page = Math.ceil(pages.length / 10);
             const last_page = total_page == page ? true : false;
-            //VideoListResult.push({ last_page: last_page });
-            //VideoListResult.push({ total_page: total_page });
             const Result_Json = JSON.stringify(result);
 
             const temp = JSON.parse(`${Result_Json}`);
