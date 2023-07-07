@@ -156,6 +156,7 @@ router.get("/post/:id", async (req, res) => {
                 "image",
                 "scrap_num",
                 "like_num",
+                "comment_num",
                 "created_at",
                 "updated_at",
             ],
@@ -194,6 +195,16 @@ router.get("/post/:id", async (req, res) => {
             raw: true,
         });
 
+        console.log(await Comments.count({where : {post_id}}))
+        const comment_num = await Comments.count({where : {post_id}})
+        await Posts.update(
+            {
+                comment_num: comment_num,
+            },
+            {
+                where: { post_id: post_id },
+            }
+        )
         // 게시글이 없을 경우
         if (!post) {
             return res
@@ -209,8 +220,8 @@ router.get("/post/:id", async (req, res) => {
         else {
             return res.status(200).json({ post, comments });
         }
-    } catch {
-        return res.status(400).json({ message: "게시글 조회에 실패했습니다." });
+    } catch(error) {
+        return res.status(400).json({ message: "게시글 조회에 실패했습니다." + error});
     }
 });
 

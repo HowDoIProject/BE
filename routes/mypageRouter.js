@@ -20,6 +20,7 @@ router.get("/mypage", auth, async (req, res) => {
                 "category",
                 "scrap_num",
                 "like_num",
+                "comment_num",
                 "created_at",
                 "updated_at",
             ],
@@ -65,6 +66,7 @@ router.get("/mypage/:page", async (req, res, next) => {
             "category",
             "scrap_num",
             "like_num",
+            "comment_num",
             "created_at",
             "updated_at",
         ],
@@ -95,6 +97,7 @@ router.get("/mypage/:page", async (req, res, next) => {
             category: item.category,
             scrap_num: item.scrap_num,
             like_num: item.like_num,
+            comment_num: item.comment_num,
             created_at: item.created_at,
             updated_at: item.updated_at,
         };

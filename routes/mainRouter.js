@@ -19,6 +19,7 @@ router.get("/post", async (req, res) => {
                 "category",
                 "scrap_num",
                 "like_num",
+                "comment_num",
                 "created_at",
                 "updated_at",
             ],
@@ -32,7 +33,7 @@ router.get("/post", async (req, res) => {
             order: [["created_at", "DESC"]],
             raw: true,
         });
-
+        
         // 작성된 게시글이 없을 경우
         if (posts.length === 0) {
             return res
@@ -68,6 +69,7 @@ router.get("/topfive", async (req, res) => {
                 "category",
                 "scrap_num",
                 "like_num",
+                "comment_num",
                 "created_at",
                 "updated_at",
             ],
@@ -128,6 +130,7 @@ router.post("/search/:keyword/:page", async (req, res, next) => {
             "category",
             "scrap_num",
             "like_num",
+            "comment_num",
             "created_at",
             "updated_at",
         ],
@@ -169,6 +172,7 @@ router.post("/search/:keyword/:page", async (req, res, next) => {
             category: item.category,
             like_num: item.like_num,
             scrap_num: item.scrap_num,
+            comment_num: item.comment_num,
             created_at: item.created_at,
             updated_at: item.updated_at,
         };
@@ -237,6 +241,7 @@ router.get("/recommend", auth, async (req, res) => {
                 "category",
                 "scrap_num",
                 "like_num",
+                "comment_num",
                 "created_at",
                 "updated_at",
             ],
