@@ -113,6 +113,103 @@ router.get("/topfive", async (req, res) => {
     }
 });
 
+//인기글 목록 조회
+router.get("/topfive/:page", async (req, res) => {
+    try {
+        const { page } = req.params;
+
+        // 게시글 목록 조회
+        const d = new Date();
+        const year = d.getFullYear();
+        const month = d.getMonth();
+        const day = d.getDate();
+        const topfive = await Posts.findAll({
+            attributes: [
+                "post_id",
+                "user_id",
+                [sequelize.col("nickname"), "nickname"],
+                "title",
+                "content",
+                "image",
+                "category",
+                "scrap_num",
+                "like_num",
+                "comment_num",
+                "created_at",
+                "updated_at",
+            ],
+            where: {
+                [Op.and]: [
+                    {
+                        created_at: {
+                            [Op.lt]: d,
+                        },
+                    },
+                    {
+                        created_at: {
+                            [Op.gte]: new Date(year, month, day - 6),
+                        },
+                    },
+                ],
+            },
+            include: [
+                {
+                    model: Users,
+                    attributes: [],
+                },
+            ],
+            group: ["Posts.post_id"],
+            order: [["like_num", "DESC"]],
+            offset: (page - 1) * 10,
+            limit: 10,
+            raw: true,
+        });
+
+        // 작성된 게시글이 없을 경우
+        if (topfive.length === 0) {
+            return res
+                .status(400)
+                .json({ message: "작성된 게시글이 없습니다." });
+        }
+        // 게시글 목록 조회
+        const result = [];
+        topfive.forEach((item) => {
+            const scroll_result = {
+                post_id: item.post_id,
+                user_id: item.user_id,
+                nickname: item.nickname,
+                user_type: item.user_type,
+                title: item.title,
+                content: item.content,
+                image: item.image,
+                category: item.category,
+                like_num: item.like_num,
+                scrap_num: item.scrap_num,
+                comment_num: item.comment_num,
+                created_at: item.created_at,
+                updated_at: item.updated_at,
+            };
+            result.push(scroll_result);
+        });
+        const total_page = 5;
+        const last_page = total_page == page ? true : false;
+    
+        const Result_Json = JSON.stringify(result);
+        const temp = JSON.parse(`${Result_Json}`);
+        return res.status(200).json({
+            result: temp,
+            page: Number(page),
+            last_page: last_page,
+            total_page: total_page,
+        });
+    
+    } catch (e) {
+        // 예외 처리
+        console.log(e);
+        return res.status(400).json({ message: "목록 조회에 실패했습니다." });
+    }
+});
+
 //검색기능
 router.post("/search/:keyword/:page", async (req, res, next) => {
     const keyword = req.params.keyword;
