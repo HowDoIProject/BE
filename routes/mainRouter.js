@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const auth = require("../middlewares/auth");
 const jwt = require("jsonwebtoken");
-const { Posts, Users, Categories, PostsLikes, sequelize } = require("../models");
+const { Posts, Users, Categories, PostsLikes, PostsScraps, sequelize } = require("../models");
 const { Op } = require("sequelize");
 
 //게시글 전체 조회
@@ -179,11 +179,9 @@ router.get("/topfive/:page", async (req, res) => {
 
         // 게시글 목록 조회
         const result = [];
-        let genres = [];
-
-
         const promises = topfive.map(async (item) => {
             let like_check = false;
+            let scrap_check = false;
             if(access){
                 const ACCESS_KEY = "howdoi_";
 
@@ -201,6 +199,16 @@ router.get("/topfive/:page", async (req, res) => {
                 }else{
                     like_check = false;
                 }
+                const scrap_search = await PostsScraps.findOne({
+                    attributes: ["post_id","user_id"],
+                    where:{ user_id: user_id, post_id: item.post_id},
+                    raw: true,
+                })
+                if(scrap_search){
+                    scrap_check = true;
+                }else{
+                    scrap_check = false;
+                }
             }
             const scroll_result = {
                 post_id: item.post_id,
@@ -214,6 +222,7 @@ router.get("/topfive/:page", async (req, res) => {
                 like_num: item.like_num,
                 like_check: like_check,
                 scrap_num: item.scrap_num,
+                scrap_check: scrap_check,
                 comment_num: item.comment_num,
                 created_at: item.created_at,
                 updated_at: item.updated_at,
@@ -233,7 +242,6 @@ router.get("/topfive/:page", async (req, res) => {
             last_page: last_page,
             total_page: total_page,
         });
-    
     } catch (e) {
         // 예외 처리
         console.log(e);
@@ -245,6 +253,7 @@ router.get("/topfive/:page", async (req, res) => {
 router.post("/search/:keyword/:page", async (req, res, next) => {
     const keyword = req.params.keyword;
     const { page } = req.params;
+    const { refresh, access } = req.headers;
 
     const post_search = await Posts.findAll({
         attributes: [
@@ -287,37 +296,70 @@ router.post("/search/:keyword/:page", async (req, res, next) => {
         limit: 10,
         raw: true,
     });
-    const result = [];
-    post_search.forEach(async (item) => {
-        const scroll_result = {
-            post_id: item.post_id,
-            user_id: item.user_id,
-            nickname: item.nickname,
-            user_type: item.user_type,
-            title: item.title,
-            content: item.content,
-            image: item.image,
-            category: item.category,
-            like_num: item.like_num,
-            scrap_num: item.scrap_num,
-            comment_num: item.comment_num,
-            created_at: item.created_at,
-            updated_at: item.updated_at,
-        };
-        result.push(scroll_result);
-    });
-    const total_count = await Posts.count();
-    const total_page = Math.ceil(total_count / 10);
-    const last_page = total_page == page ? true : false;
+        const result = [];
+        const promises = post_search.map(async (item) => {
+            let like_check = false;
+            let scrap_check = false;
+            if(access){
+                const ACCESS_KEY = "howdoi_";
 
-    const Result_Json = JSON.stringify(result);
-    const temp = JSON.parse(`${Result_Json}`);
-    return res.status(200).json({
-        result: temp,
-        page: Number(page),
-        last_page: last_page,
-        total_page: total_page,
-    });
+                const [accessType, accessToken] = access.split(" ");
+                const decodedAccess = jwt.verify(accessToken, ACCESS_KEY);
+                const { user_id } = decodedAccess.user_id
+            
+                const like_search = await PostsLikes.findOne({
+                    attributes: ["post_id","user_id"],
+                    where:{ user_id: user_id, post_id: item.post_id},
+                    raw: true,
+                })
+                if(like_search){
+                    like_check = true;
+                }else{
+                    like_check = false;
+                }
+                const scrap_search = await PostsScraps.findOne({
+                    attributes: ["post_id","user_id"],
+                    where:{ user_id: user_id, post_id: item.post_id},
+                    raw: true,
+                })
+                if(scrap_search){
+                    scrap_check = true;
+                }else{
+                    scrap_check = false;
+                }
+            }
+            const scroll_result = {
+                post_id: item.post_id,
+                user_id: item.user_id,
+                nickname: item.nickname,
+                user_type: item.user_type,
+                title: item.title,
+                content: item.content,
+                image: item.image,
+                category: item.category,
+                like_num: item.like_num,
+                like_check: like_check,
+                scrap_num: item.scrap_num,
+                scrap_check: scrap_check,
+                comment_num: item.comment_num,
+                created_at: item.created_at,
+                updated_at: item.updated_at,
+            };
+            result.push(scroll_result);
+        });
+        await Promise.all(promises);
+
+        const total_page = 5;
+        const last_page = total_page == page ? true : false;
+
+        const Result_Json = JSON.stringify(result);
+        const temp = JSON.parse(`${Result_Json}`);
+        return res.status(200).json({
+            result: temp,
+            page: Number(page),
+            last_page: last_page,
+            total_page: total_page,
+        });
 });
 
 //추천 게시글 조회

@@ -1,8 +1,9 @@
 const express = require("express");
 const router = express.Router();
 const auth = require("../middlewares/auth");
-const { Posts, Users, Comments, sequelize } = require("../models");
+const { Posts, Users, Comments, PostsLikes, PostsScraps, sequelize } = require("../models");
 const { Op } = require("sequelize");
+const jwt = require("jsonwebtoken")
 
 router.get("/mypage", auth, async (req, res) => {
     try {
@@ -51,9 +52,11 @@ router.get("/mypage", auth, async (req, res) => {
     }
 });
 
-router.get("/mypage/:page", async (req, res, next) => {
-    console.log("무한스크롤 리스트 조회 API 호출됨");
+router.get("/mypage/:page", auth, async (req, res, next) => {
     const { page } = req.params;
+    const user_id = res.locals.id;
+    const { refresh, access } = req.headers;
+
     const mypage = await Posts.findAll({
         attributes: [
             "post_id",
@@ -84,8 +87,37 @@ router.get("/mypage/:page", async (req, res, next) => {
     });
 
     const result = [];
-    console.log(mypage);
-    mypage.forEach((item) => {
+    const promises = mypage.map(async (item) => {
+        let like_check = false;
+        let scrap_check = false;
+        if(access){
+            const ACCESS_KEY = "howdoi_";
+
+            const [accessType, accessToken] = access.split(" ");
+            const decodedAccess = jwt.verify(accessToken, ACCESS_KEY);
+            const { user_id } = decodedAccess.user_id
+        
+            const like_search = await PostsLikes.findOne({
+                attributes: ["post_id","user_id"],
+                where:{ user_id: user_id, post_id: item.post_id},
+                raw: true,
+            })
+            if(like_search){
+                like_check = true;
+            }else{
+                like_check = false;
+            }
+            const scrap_search = await PostsScraps.findOne({
+                attributes: ["post_id","user_id"],
+                where:{ user_id: user_id, post_id: item.post_id},
+                raw: true,
+            })
+            if(scrap_search){
+                scrap_check = true;
+            }else{
+                scrap_check = false;
+            }
+        }
         const scroll_result = {
             post_id: item.post_id,
             user_id: item.user_id,
@@ -95,27 +127,30 @@ router.get("/mypage/:page", async (req, res, next) => {
             content: item.content,
             image: item.image,
             category: item.category,
-            scrap_num: item.scrap_num,
             like_num: item.like_num,
+            like_check: like_check,
+            scrap_num: item.scrap_num,
+            scrap_check: scrap_check,
             comment_num: item.comment_num,
             created_at: item.created_at,
             updated_at: item.updated_at,
         };
         result.push(scroll_result);
     });
+    await Promise.all(promises);
 
-    const total_count = await Posts.count();
-    const total_page = Math.ceil(total_count / 10);
+    const total_page = 5;
     const last_page = total_page == page ? true : false;
-    //VideoListResult.push({ last_page: last_page });
-    //VideoListResult.push({ total_page: total_page });
-    const Result_Json = JSON.stringify(result);
 
+    const Result_Json = JSON.stringify(result);
     const temp = JSON.parse(`${Result_Json}`);
-    return res
-        .status(200)
-        .json({ mypage: temp, last_page: last_page, total_page: total_page });
-    //return res.status(200).json({ VideoList: temp});
+    return res.status(200).json({
+        result: temp,
+        page: Number(page),
+        last_page: last_page,
+        total_page: total_page,
+    });
+
 });
 
 //내가 작성한 댓글

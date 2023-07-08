@@ -1,7 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const auth = require("../middlewares/auth");
-const { Posts, Users, Comments, PostsScraps, sequelize } = require("../models");
+const { Posts, Users, Comments, PostsLikes, PostsScraps, sequelize } = require("../models");
+const jwt = require("jsonwebtoken");
 const { Op } = require("sequelize");
 
 router.get("/scrap/:filter/:category/:page", auth, async (req, res) => {
@@ -9,6 +10,7 @@ router.get("/scrap/:filter/:category/:page", auth, async (req, res) => {
         const user_id = res.locals.id;
         const { page } = req.params;
         let { filter, category } = req.params;
+        const { refresh, access } = req.headers;
 
         if (filter === "0" && category === "0") {
             // 게시글 목록 조회
@@ -43,7 +45,37 @@ router.get("/scrap/:filter/:category/:page", auth, async (req, res) => {
                 raw: true,
             });
             const result = [];
-            list.forEach((item) => {
+            const promises = list.map(async (item) => {
+                let like_check = false;
+                let scrap_check = false;
+                if(access){
+                    const ACCESS_KEY = "howdoi_";
+    
+                    const [accessType, accessToken] = access.split(" ");
+                    const decodedAccess = jwt.verify(accessToken, ACCESS_KEY);
+                    const { user_id } = decodedAccess.user_id
+                
+                    const like_search = await PostsLikes.findOne({
+                        attributes: ["post_id","user_id"],
+                        where:{ user_id: user_id, post_id: item.post_id},
+                        raw: true,
+                    })
+                    if(like_search){
+                        like_check = true;
+                    }else{
+                        like_check = false;
+                    }
+                    const scrap_search = await PostsScraps.findOne({
+                        attributes: ["post_id","user_id"],
+                        where:{ user_id: user_id, post_id: item.post_id},
+                        raw: true,
+                    })
+                    if(scrap_search){
+                        scrap_check = true;
+                    }else{
+                        scrap_check = false;
+                    }
+                }
                 const scroll_result = {
                     post_id: item.post_id,
                     user_id: item.user_id,
@@ -53,15 +85,18 @@ router.get("/scrap/:filter/:category/:page", auth, async (req, res) => {
                     content: item.content,
                     image: item.image,
                     category: item.category,
-                    scrap_num: item.scrap_num,
                     like_num: item.like_num,
+                    like_check: like_check,
+                    scrap_num: item.scrap_num,
+                    scrap_check: scrap_check,
                     comment_num: item.comment_num,
                     created_at: item.created_at,
                     updated_at: item.updated_at,
                 };
                 result.push(scroll_result);
             });
-
+            await Promise.all(promises);
+    
             const total_count = await Posts.count();
             const total_page = Math.ceil(total_count / 10);
             const last_page = total_page == page ? true : false;
@@ -117,8 +152,37 @@ router.get("/scrap/:filter/:category/:page", auth, async (req, res) => {
             });
 
             const result = [];
-
-            list.forEach((item) => {
+            const promises = list.map(async (item) => {
+                let like_check = false;
+                let scrap_check = false;
+                if(access){
+                    const ACCESS_KEY = "howdoi_";
+    
+                    const [accessType, accessToken] = access.split(" ");
+                    const decodedAccess = jwt.verify(accessToken, ACCESS_KEY);
+                    const { user_id } = decodedAccess.user_id
+                
+                    const like_search = await PostsLikes.findOne({
+                        attributes: ["post_id","user_id"],
+                        where:{ user_id: user_id, post_id: item.post_id},
+                        raw: true,
+                    })
+                    if(like_search){
+                        like_check = true;
+                    }else{
+                        like_check = false;
+                    }
+                    const scrap_search = await PostsScraps.findOne({
+                        attributes: ["post_id","user_id"],
+                        where:{ user_id: user_id, post_id: item.post_id},
+                        raw: true,
+                    })
+                    if(scrap_search){
+                        scrap_check = true;
+                    }else{
+                        scrap_check = false;
+                    }
+                }
                 const scroll_result = {
                     post_id: item.post_id,
                     user_id: item.user_id,
@@ -128,23 +192,25 @@ router.get("/scrap/:filter/:category/:page", auth, async (req, res) => {
                     content: item.content,
                     image: item.image,
                     category: item.category,
-                    scrap_num: item.scrap_num,
                     like_num: item.like_num,
+                    like_check: like_check,
+                    scrap_num: item.scrap_num,
+                    scrap_check: scrap_check,
                     comment_num: item.comment_num,
                     created_at: item.created_at,
                     updated_at: item.updated_at,
                 };
                 result.push(scroll_result);
             });
-
+            await Promise.all(promises);
+    
             const total_count = await Posts.count();
             const total_page = Math.ceil(total_count / 10);
             const last_page = total_page == page ? true : false;
-            //VideoListResult.push({ last_page: last_page });
-            //VideoListResult.push({ total_page: total_page });
             const Result_Json = JSON.stringify(result);
 
             const temp = JSON.parse(`${Result_Json}`);
+
             return res.status(200).json({
                 mypage: temp,
                 page: Number(page),
@@ -190,36 +256,65 @@ router.get("/scrap/:filter/:category/:page", auth, async (req, res) => {
             });
 
             const result = [];
-            list.forEach((item) => {
-                console.log(item.post_id)
-                if (item["PostsScraps.User.user_type"] === filter){
-                    const scroll_result = {
-                        post_id: item.post_id,
-                        user_id: item.user_id,
-                        nickname: item["PostsScraps.User.nickname"],
-                        user_type: item["PostsScraps.User.user_type"],
-                        title: item.title,
-                        content: item.content,
-                        image: item.image,
-                        category: item.category,
-                        scrap_num: item.scrap_num,
-                        like_num: item.like_num,
-                        comment_num: item.comment_num,
-                        created_at: item.created_at,
-                        updated_at: item.updated_at,
-                    };
-                    result.push(scroll_result);
+            const promises = list.map(async (item) => {
+                let like_check = false;
+                let scrap_check = false;
+                if(access){
+                    const ACCESS_KEY = "howdoi_";
+    
+                    const [accessType, accessToken] = access.split(" ");
+                    const decodedAccess = jwt.verify(accessToken, ACCESS_KEY);
+                    const { user_id } = decodedAccess.user_id
+                
+                    const like_search = await PostsLikes.findOne({
+                        attributes: ["post_id","user_id"],
+                        where:{ user_id: user_id, post_id: item.post_id},
+                        raw: true,
+                    })
+                    if(like_search){
+                        like_check = true;
+                    }else{
+                        like_check = false;
+                    }
+                    const scrap_search = await PostsScraps.findOne({
+                        attributes: ["post_id","user_id"],
+                        where:{ user_id: user_id, post_id: item.post_id},
+                        raw: true,
+                    })
+                    if(scrap_search){
+                        scrap_check = true;
+                    }else{
+                        scrap_check = false;
+                    }
                 }
+                const scroll_result = {
+                    post_id: item.post_id,
+                    user_id: item.user_id,
+                    nickname: item["PostsScraps.User.nickname"],
+                    user_type: item["PostsScraps.User.user_type"],
+                    title: item.title,
+                    content: item.content,
+                    image: item.image,
+                    category: item.category,
+                    like_num: item.like_num,
+                    like_check: like_check,
+                    scrap_num: item.scrap_num,
+                    scrap_check: scrap_check,
+                    comment_num: item.comment_num,
+                    created_at: item.created_at,
+                    updated_at: item.updated_at,
+                };
+                result.push(scroll_result);
             });
-
+            await Promise.all(promises);
+    
             const total_count = await Posts.count();
             const total_page = Math.ceil(total_count / 10);
             const last_page = total_page == page ? true : false;
-            //VideoListResult.push({ last_page: last_page });
-            //VideoListResult.push({ total_page: total_page });
             const Result_Json = JSON.stringify(result);
 
             const temp = JSON.parse(`${Result_Json}`);
+
             return res.status(200).json({
                 mypage: temp,
                 page: Number(page),
@@ -274,35 +369,65 @@ router.get("/scrap/:filter/:category/:page", auth, async (req, res) => {
             });
 
             const result = [];
-            console.log(list);
-            list.forEach((item) => {
-                if (item["PostsScraps.User.user_type"] === filter){
-                    const scroll_result = {
-                        post_id: item.post_id,
-                        user_id: item.user_id,
-                        nickname: item["PostsScraps.User.nickname"],
-                        user_type: item["PostsScraps.User.user_type"],
-                        title: item.title,
-                        content: item.content,
-                        image: item.image,
-                        category: item.category,
-                        scrap_num: item.scrap_num,
-                        like_num: item.like_num,
-                        comment_num: item.comment_num,
-                        created_at: item.created_at,
-                        updated_at: item.updated_at,
-                    };
-                    result.push(scroll_result);
-                }            });
-
+            const promises = list.map(async (item) => {
+                let like_check = false;
+                let scrap_check = false;
+                if(access){
+                    const ACCESS_KEY = "howdoi_";
+    
+                    const [accessType, accessToken] = access.split(" ");
+                    const decodedAccess = jwt.verify(accessToken, ACCESS_KEY);
+                    const { user_id } = decodedAccess.user_id
+                
+                    const like_search = await PostsLikes.findOne({
+                        attributes: ["post_id","user_id"],
+                        where:{ user_id: user_id, post_id: item.post_id},
+                        raw: true,
+                    })
+                    if(like_search){
+                        like_check = true;
+                    }else{
+                        like_check = false;
+                    }
+                    const scrap_search = await PostsScraps.findOne({
+                        attributes: ["post_id","user_id"],
+                        where:{ user_id: user_id, post_id: item.post_id},
+                        raw: true,
+                    })
+                    if(scrap_search){
+                        scrap_check = true;
+                    }else{
+                        scrap_check = false;
+                    }
+                }
+                const scroll_result = {
+                    post_id: item.post_id,
+                    user_id: item.user_id,
+                    nickname: item["PostsScraps.User.nickname"],
+                    user_type: item["PostsScraps.User.user_type"],
+                    title: item.title,
+                    content: item.content,
+                    image: item.image,
+                    category: item.category,
+                    like_num: item.like_num,
+                    like_check: like_check,
+                    scrap_num: item.scrap_num,
+                    scrap_check: scrap_check,
+                    comment_num: item.comment_num,
+                    created_at: item.created_at,
+                    updated_at: item.updated_at,
+                };
+                result.push(scroll_result);
+            });
+            await Promise.all(promises);
+    
             const total_count = await Posts.count();
             const total_page = Math.ceil(total_count / 10);
             const last_page = total_page == page ? true : false;
-            //VideoListResult.push({ last_page: last_page });
-            //VideoListResult.push({ total_page: total_page });
             const Result_Json = JSON.stringify(result);
 
             const temp = JSON.parse(`${Result_Json}`);
+
             return res.status(200).json({
                 mypage: temp,
                 page: Number(page),
@@ -310,7 +435,6 @@ router.get("/scrap/:filter/:category/:page", auth, async (req, res) => {
                 total_page: total_page,
             });
         }
-
         // 게시글 목록 조회
     } catch (e) {
         // 예외 처리
