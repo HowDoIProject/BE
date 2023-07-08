@@ -1,7 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const auth = require("../middlewares/auth");
-const { Posts, Users, Categories, sequelize } = require("../models");
+const jwt = require("jsonwebtoken");
+const { Posts, Users, Categories, PostsLikes, sequelize } = require("../models");
 const { Op } = require("sequelize");
 
 //게시글 전체 조회
@@ -34,7 +35,7 @@ router.get("/post", async (req, res) => {
             order: [["created_at", "DESC"]],
             raw: true,
         });
-        
+        console.log(posts)
         // 작성된 게시글이 없을 경우
         if (posts.length === 0) {
             return res
@@ -119,6 +120,7 @@ router.get("/topfive", async (req, res) => {
 router.get("/topfive/:page", async (req, res) => {
     try {
         const { page } = req.params;
+        const { refresh, access } = req.headers;
 
         // 게시글 목록 조회
         const d = new Date();
@@ -174,9 +176,32 @@ router.get("/topfive/:page", async (req, res) => {
                 .status(400)
                 .json({ message: "작성된 게시글이 없습니다." });
         }
+
         // 게시글 목록 조회
         const result = [];
-        topfive.forEach((item) => {
+        let genres = [];
+
+
+        const promises = topfive.map(async (item) => {
+            let like_check = false;
+            if(access){
+                const ACCESS_KEY = "howdoi_";
+
+                const [accessType, accessToken] = access.split(" ");
+                const decodedAccess = jwt.verify(accessToken, ACCESS_KEY);
+                const { user_id } = decodedAccess.user_id
+            
+                const like_search = await PostsLikes.findOne({
+                    attributes: ["post_id","user_id"],
+                    where:{ user_id: user_id, post_id: item.post_id},
+                    raw: true,
+                })
+                if(like_search){
+                    like_check = true;
+                }else{
+                    like_check = false;
+                }
+            }
             const scroll_result = {
                 post_id: item.post_id,
                 user_id: item.user_id,
@@ -187,6 +212,7 @@ router.get("/topfive/:page", async (req, res) => {
                 image: item.image,
                 category: item.category,
                 like_num: item.like_num,
+                like_check: like_check,
                 scrap_num: item.scrap_num,
                 comment_num: item.comment_num,
                 created_at: item.created_at,
@@ -194,9 +220,11 @@ router.get("/topfive/:page", async (req, res) => {
             };
             result.push(scroll_result);
         });
+        await Promise.all(promises);
+
         const total_page = 5;
         const last_page = total_page == page ? true : false;
-    
+
         const Result_Json = JSON.stringify(result);
         const temp = JSON.parse(`${Result_Json}`);
         return res.status(200).json({
@@ -260,7 +288,7 @@ router.post("/search/:keyword/:page", async (req, res, next) => {
         raw: true,
     });
     const result = [];
-    post_search.forEach((item) => {
+    post_search.forEach(async (item) => {
         const scroll_result = {
             post_id: item.post_id,
             user_id: item.user_id,
