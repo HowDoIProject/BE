@@ -153,6 +153,33 @@ router.get("/mypage/:page", auth, async (req, res, next) => {
 
 });
 
+router.get("/mystat", auth, async (req, res) => {
+    try{
+        const {user_id} = res.locals.id
+        const mypost = await Posts.findAll({
+            where: { user_id }
+        });
+        const mycomment = await Comment.findAll({
+            where: { user_id }
+        });
+        const mylikedcomment = await Comments.findAll({
+            attributes: [
+                "like_num"
+            ],
+            where: { user_id },
+            order: [["created_at", "DESC"]],
+            raw: true,
+        });
+
+
+    }catch(error){
+        // 예외 처리
+        return res
+            .status(400)
+            .json({ message: "조회에 실패했습니다." + e });
+    }
+})
+
 //내가 작성한 댓글
 router.get("/mycomment", auth, async (req, res) => {
     try {

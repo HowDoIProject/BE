@@ -188,7 +188,7 @@ router.get("/topfive/:page", async (req, res) => {
                 const [accessType, accessToken] = access.split(" ");
                 const decodedAccess = jwt.verify(accessToken, ACCESS_KEY);
                 const { user_id } = decodedAccess.user_id
-            
+                
                 const like_search = await PostsLikes.findOne({
                     attributes: ["post_id","user_id"],
                     where:{ user_id: user_id, post_id: item.post_id},
@@ -380,23 +380,65 @@ router.get("/recommend", auth, async (req, res) => {
             where: { user_id },
             raw: true,
         });
-
+        const { gender } = await Users.findOne({
+            attributes: ["gender"],
+            where: { user_id },
+            raw: true,
+        });
+        const { category } = await Users.findOne({
+            attributes: ["category"],
+            where: { user_id },
+            raw: true,
+        });
+        const [one, two, three] = category.split(",")
+        console.log(one)
         // 비슷한 회원 검색
         const target_user = await Users.findAll({
             where: { 
                 user_type,
                 age,
+                gender,
                 user_id: {
                     [Op.ne]: user_id
+                },
+                category: {
+                    [Op.or]: [
+                        {[Op.like]: "%" + one + "%"},
+                        {[Op.like]: "%" + two + "%"},
+                        {[Op.like]: "%" + three + "%"}
+                    ]
                 }
              },
             raw: true,
         });
-        console.log(target_user.length);
+        console.log(target_user);
 
         if (target_user.length === 0){
+            
             const recommend = await Posts.findAll({
-
+                attributes: [
+                    "post_id",
+                    "user_id",
+                    [sequelize.col("nickname"), "nickname"],
+                    [sequelize.col("user_type"), "user_type"],
+                    "title",
+                    "content",
+                    "image",
+                    "category",
+                    "scrap_num",
+                    "like_num",
+                    "comment_num",
+                    "created_at",
+                    "updated_at",
+                ],
+                where: {category},
+                include: [
+                    {
+                        model: Users,
+                        attributes: [],
+                    },
+                ],
+    
             })
         }
         // 게시글 목록 조회
