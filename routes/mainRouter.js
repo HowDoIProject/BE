@@ -391,9 +391,9 @@ router.get("/recommend", auth, async (req, res) => {
             raw: true,
         });
         const [one, two, three] = category.split(",")
-        console.log(one)
+
         // 비슷한 회원 검색
-        const target_user = await Users.findAll({
+        const target_user = await Users.findOne({
             where: { 
                 user_type,
                 age,
@@ -411,7 +411,6 @@ router.get("/recommend", auth, async (req, res) => {
              },
             raw: true,
         });
-        console.log(target_user);
 
         if (target_user.length === 0){
             
@@ -431,64 +430,57 @@ router.get("/recommend", auth, async (req, res) => {
                     "created_at",
                     "updated_at",
                 ],
-                where: {category},
+                where: {               
+                    category: {
+                        [Op.or]: [
+                            {[Op.like]: "%" + one + "%"},
+                            {[Op.like]: "%" + two + "%"},
+                            {[Op.like]: "%" + three + "%"}
+                        ]
+                    }
+                },
                 include: [
                     {
                         model: Users,
                         attributes: [],
                     },
                 ],
-    
+                order: [["like_num", "DESC"]],
+                raw: true,
+
             })
-        }
-        // 게시글 목록 조회
-        const recommend = await Posts.findAll({
-            attributes: [
-                "post_id",
-                "user_id",
-                [sequelize.col("nickname"), "nickname"],
-                "title",
-                "content",
-                "image",
-                "category",
-                "scrap_num",
-                "like_num",
-                "comment_num",
-                "created_at",
-                "updated_at",
-            ],
-            where: {
-                [Op.and]: [
+        } else {
+            const recommend = await Posts.findAll({
+                attributes: [
+                    "post_id",
+                    "user_id",
+                    [sequelize.col("nickname"), "nickname"],
+                    [sequelize.col("user_type"), "user_type"],
+                    "title",
+                    "content",
+                    "image",
+                    "category",
+                    "scrap_num",
+                    "like_num",
+                    "comment_num",
+                    "created_at",
+                    "updated_at",
+                ],
+                where: {               
+                    
+                },
+                include: [
                     {
-                        created_at: {
-                            [Op.lt]: d,
-                        },
-                    },
-                    {
-                        created_at: {
-                            [Op.gte]: new Date(year, month, day - 6),
-                        },
+                        model: Users,
+                        attributes: [],
                     },
                 ],
-            },
-            include: [
-                {
-                    model: Users,
-                    attributes: [],
-                },
-            ],
-            group: ["Posts.post_id"],
-            order: [["like_num", "DESC"]],
-            raw: true,
-        });
+                order: [["like_num", "DESC"]],
+                raw: true,
 
-        // 작성된 게시글이 없을 경우
-        if (topfive.length === 0) {
-            return res
-                .status(400)
-                .json({ message: "작성된 게시글이 없습니다." });
+            })
         }
-        // 게시글 목록 조회
+
         return res.status(200).json({ topfive });
     } catch (e) {
         // 예외 처리
