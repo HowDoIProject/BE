@@ -8,6 +8,9 @@ const auth = require("../middlewares/auth");
 const { Posts, Users, Comments, PostsLikes, sequelize } = require("../models");
 const { Op } = require("sequelize");
 
+const CommentController = require("../controllers/commentsController.js");
+const commentcontroller = new CommentController();
+
 const s3 = new AWS.S3({
     accessKeyId: process.env.S3_ACCESS_KEY_ID,
     secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,
@@ -34,246 +37,18 @@ router.post("/uploads", upload, async (req, res, next) => {
 });
 
 //댓글 작성
-router.post("/post/:id/comment", auth, async (req, res) => {
-    try {
-        const { user_id } = res.locals.id;
-        const { comment, image } = req.body;
-        const { id } = req.params;
-        const post_id = Number(id);
-
-        if (!comment) {
-            return res.status(400).json({ message: "다시 한 번 확인해주세요" });
-        } else {
-            await Comments.create({
-                post_id,
-                user_id,
-                comment,
-                image,
-            }).then((data) => {
-                return res.status(200).json({
-                    message: "댓글 작성이 완료되었습니다.",
-                });
-            });
-        }
-    } catch (error) {
-        console.log(error);
-        return res.status(400).json({ message: "댓글 작성에 실패했습니다." });
-    }
-});
+router.post("/post/:id/comment", auth, commentcontroller.postComment);
 
 //댓글 삭제
-router.delete("/post/:p_id/comment/:c_id", auth, async (req, res) => {
-    try {
-        const { user_id } = res.locals.id;
-        const { p_id, c_id } = req.params;
-        const post_id = Number(p_id);
-        const comment_id = Number(c_id);
-
-        const targetPost = await Posts.findOne({ where: { post_id } });
-        if (!targetPost) {
-            return res
-                .status(400)
-                .json({ message: "유효하지 않은 게시글입니다." });
-        }
-
-        const targetComment = await Comments.findOne({ where: { comment_id } });
-        if (!targetComment) {
-            return res
-                .status(400)
-                .json({ message: "유효하지 않은 댓글입니다." });
-        }
-
-        if (targetComment.user_id !== user_id) {
-            return res.status(400).json({ errorMessage: "권한이 없습니다." });
-        }
-
-        await Comments.destroy({
-            where: { post_id, comment_id },
-        }).then((data) => {
-            return res.status(200).json({
-                message: "댓글 삭제가 완료되었습니다.",
-            });
-        });
-    } catch (error) {
-        console.log(error);
-        return res.status(400).json({ message: "댓글 삭제에 실패했습니다." });
-    }
-});
+router.delete("/post/:p_id/comment/:c_id", auth, commentcontroller.deleteComment);
 
 //댓글 수정
-router.put("/post/:p_id/comment/:c_id", auth, async (req, res) => {
-    try {
-        const { user_id } = res.locals.id;
-        const { comment, image } = req.body;
-        const { p_id, c_id } = req.params;
-        const post_id = Number(p_id);
-        const comment_id = Number(c_id);
-
-        const targetPost = await Posts.findOne({ where: { post_id } });
-        if (!targetPost) {
-            return res
-                .status(400)
-                .json({ message: "유효하지 않은 게시글입니다." });
-        }
-
-        const targetComment = await Comments.findOne({ where: { comment_id } });
-        if (!targetComment) {
-            return res
-                .status(400)
-                .json({ message: "유효하지 않은 댓글입니다." });
-        }
-
-        if (targetComment.user_id !== user_id) {
-            return res.status(400).json({ message: "권한이 없습니다." });
-        }
-
-        await Comments.update(
-            {
-                comment: comment,
-                image: image,
-            },
-            {
-                where: { comment_id: comment_id },
-            }
-        ).then((data) => {
-            return res.status(200).json({
-                message: "댓글 수정이 완료되었습니다.",
-            });
-        });
-    } catch (error) {
-        console.log(error);
-        return res.status(400).json({ message: "댓글 수정에 실패했습니다." });
-    }
-});
+router.put("/post/:p_id/comment/:c_id", auth, commentcontroller.updateComment);
 
 //댓글 채택
-router.post("/post/:p_id/comment/:c_id", auth, async (req, res) => {
-    try {
-        const { user_id } = res.locals.id;
-        const { p_id, c_id } = req.params;
-        const post_id = Number(p_id);
-        const comment_id = Number(c_id);
-
-        const targetPost = await Posts.findOne({ where: { post_id } });
-        if (!targetPost) {
-            return res
-                .status(400)
-                .json({ message: "유효하지 않은 게시글입니다." });
-        }
-
-        const targetComment = await Comments.findOne({ where: { comment_id } });
-        if (!targetComment) {
-            return res
-                .status(400)
-                .json({ message: "유효하지 않은 댓글입니다." });
-        }
-
-        if (targetComment.user_id !== user_id) {
-            return res.status(400).json({ message: "권한이 없습니다." });
-        }
-
-        const chosen_comments = await Comments.findAll({
-            attributes: [
-                "comment_id",
-                "post_id",
-                "user_id",
-                [sequelize.col("nickname"), "nickname"],
-                "comment",
-                "image",
-                "chosen",
-                "created_at",
-                "updated_at",
-            ],
-            where: { post_id, chosen: 1 },
-            include: [
-                {
-                    model: Users,
-                    attributes: [],
-                },
-            ],
-            order: [["created_at", "DESC"]],
-            raw: true,
-        });
-        if (chosen_comments.length !== 0) {
-            return res
-                .status(400)
-                .json({ message: "이미 채택된 답변이 존재합니다. " });
-        } else {
-            await Comments.update(
-                {
-                    chosen: 1,
-                },
-                {
-                    where: { post_id, comment_id },
-                }
-            ).then((data) => {
-                return res.status(200).json({
-                    message: "채택이 완료되었습니다.",
-                });
-            });
-        }
-    } catch (error) {
-        console.log(error);
-        return res
-            .status(400)
-            .json({ message: "채택에 실패했습니다." + error });
-    }
-});
+router.post("/post/:p_id/comment/:c_id", auth, commentcontroller.chooseComment);
 
 //댓글 도움됐어요
-router.post("/commentlike/:id", auth, async (req, res) => {
-    try {
-        const user_id = res.locals.id;
-        const { id } = req.params;
-        const comment_id = Number(id);
-        likes = await PostsLikes.findAll({
-            attributes: ["comment_id", "user_id"],
-            where: { comment_id, user_id: user_id.user_id },
-            raw: true,
-        });
-
-        if (likes.length !== 0) {
-            await PostsLikes.destroy({
-                where: {
-                    user_id: user_id.user_id,
-                    comment_id,
-                },
-            }).then((data) => {
-                return res.status(200).json({
-                    message: "좋아요가 취소되었습니다.",
-                });
-            });
-        } else {
-            await PostsLikes.create({
-                user_id: user_id.user_id,
-                comment_id,
-            }).then((data) => {
-                return res.status(200).json({
-                    message: "좋아요가 완료되었습니다.",
-                });
-            });
-        }
-
-        like_num = await PostsLikes.findAll({
-            attributes: ["comment_id", "user_id"],
-            where: { comment_id },
-            raw: true,
-        });
-
-        await Comments.update(
-            {
-                like_num: like_num.length,
-            },
-            {
-                where: { comment_id: comment_id },
-            }
-        );
-    } catch (error) {
-        console.log(error);
-        return res
-            .status(400)
-            .json({ message: "좋아요에 실패했습니다." + error });
-    }
-});
+router.post("/commentlike/:id", auth, commentcontroller.likeComment);
 
 module.exports = router;
