@@ -127,6 +127,47 @@ router.get("/topfive/:page", async (req, res) => {
         const year = d.getFullYear();
         const month = d.getMonth();
         const day = d.getDate();
+        const pages = await Posts.findAll({
+            attributes: [
+                "post_id",
+                "user_id",
+                [sequelize.col("nickname"), "nickname"],
+                [sequelize.col("user_type"), "user_type"],
+                "title",
+                "content",
+                "image",
+                "category",
+                "scrap_num",
+                "like_num",
+                "comment_num",
+                "created_at",
+                "updated_at",
+            ],
+            where: {
+                [Op.and]: [
+                    {
+                        created_at: {
+                            [Op.lt]: d,
+                        },
+                    },
+                    {
+                        created_at: {
+                            [Op.gte]: new Date(year, month, day - 6),
+                        },
+                    },
+                ],
+            },
+            include: [
+                {
+                    model: Users,
+                    attributes: [],
+                },
+            ],
+            group: ["Posts.post_id"],
+            order: [["like_num", "DESC"]],
+            raw: true,
+        });
+
         const topfive = await Posts.findAll({
             attributes: [
                 "post_id",
@@ -235,7 +276,7 @@ router.get("/topfive/:page", async (req, res) => {
             if(a.like_num > b.like_num) return -1;
             return 0;
         })
-        const total_page = 5;
+        const total_page = Math.ceil(pages.length / 10);
         const last_page = total_page == page ? true : false;
 
         const Result_Json = JSON.stringify(result_sort);
