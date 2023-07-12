@@ -230,11 +230,15 @@ router.get("/topfive/:page", async (req, res) => {
             result.push(scroll_result);
         });
         await Promise.all(promises);
-
+        let result_sort = result.sort((a,b) => {
+            if(a.like_num < b.like_num) return 1;
+            if(a.like_num > b.like_num) return -1;
+            return 0;
+        })
         const total_page = 5;
         const last_page = total_page == page ? true : false;
 
-        const Result_Json = JSON.stringify(result);
+        const Result_Json = JSON.stringify(result_sort);
         const temp = JSON.parse(`${Result_Json}`);
         return res.status(200).json({
             result: temp,
