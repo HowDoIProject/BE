@@ -168,7 +168,7 @@ router.post("/post/:p_id/comment/:c_id", auth, async (req, res) => {
                 .json({ message: "유효하지 않은 댓글입니다." });
         }
 
-        if (targetComment.user_id !== user_id) {
+        if (targetPost.user_id !== user_id) {
             return res.status(400).json({ message: "권한이 없습니다." });
         }
 
