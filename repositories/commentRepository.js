@@ -95,5 +95,34 @@ class CommentRepository {
             }
         );
     }
+
+    detailComment = async({ post_id }) => {
+        return await Comments.findAll({
+            attributes: [
+                "comment_id",
+                "user_id",
+                [sequelize.col("nickname"), "nickname"],
+                [sequelize.col("user_type"), "user_type"],
+                "comment",
+                "image",
+                "chosen",
+                "like_num",
+                "created_at",
+                "updated_at",
+            ],
+            where: { post_id },
+            include: [
+                {
+                    model: Users,
+                    attributes: [],
+                },
+            ],
+            raw: true,
+        });
+    }
+
+    countComment = async({ post_id }) => {
+        return await Comments.count({ where: { post_id } })
+    }
 }
 module.exports = CommentRepository;

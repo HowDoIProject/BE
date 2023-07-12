@@ -5,8 +5,6 @@ const multerS3 = require("multer-s3");
 const shortId = require("shortid");
 const AWS = require("aws-sdk");
 const auth = require("../middlewares/auth");
-const { Posts, Users, Comments, PostsLikes, sequelize } = require("../models");
-const { Op } = require("sequelize");
 
 const CommentController = require("../controllers/commentsController.js");
 const commentcontroller = new CommentController();

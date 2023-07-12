@@ -100,10 +100,15 @@ router.get("/list/:filter/:category/:page", async (req, res) => {
             });
             await Promise.all(promises);
 
+            let result_sort = result.sort((a,b) => {
+                if(a.created_at < b.created_at) return 1;
+                if(a.created_at > b.created_at) return -1;
+                return 0;
+            })
             const total_count = await Posts.count();
             const total_page = Math.ceil(total_count / 10);
             const last_page = total_page == page ? true : false;
-            const Result_Json = JSON.stringify(result);
+            const Result_Json = JSON.stringify(result_sort);
 
             const temp = JSON.parse(`${Result_Json}`);
             return res.status(200).json({
@@ -228,10 +233,14 @@ router.get("/list/:filter/:category/:page", async (req, res) => {
                 result.push(scroll_result);
             });
             await Promise.all(promises);
-
+            let result_sort = result.sort((a,b) => {
+                if(a.created_at < b.created_at) return 1;
+                if(a.created_at > b.created_at) return -1;
+                return 0;
+            })
             const total_page = Math.ceil(pages.length / 10);
             const last_page = total_page == page ? true : false;
-            const Result_Json = JSON.stringify(result);
+            const Result_Json = JSON.stringify(result_sort);
 
             const temp = JSON.parse(`${Result_Json}`);
             return res.status(200).json({
@@ -361,10 +370,14 @@ router.get("/list/:filter/:category/:page", async (req, res) => {
                 result.push(scroll_result);
             });
             await Promise.all(promises);
-
+            let result_sort = result.sort((a,b) => {
+                if(a.created_at < b.created_at) return 1;
+                if(a.created_at > b.created_at) return -1;
+                return 0;
+            })
             const total_page = Math.ceil(pages.length / 10);
             const last_page = total_page == page ? true : false;
-            const Result_Json = JSON.stringify(result);
+            const Result_Json = JSON.stringify(result_sort);
 
             const temp = JSON.parse(`${Result_Json}`);
             return res.status(200).json({
@@ -502,10 +515,14 @@ router.get("/list/:filter/:category/:page", async (req, res) => {
                 result.push(scroll_result);
             });
             await Promise.all(promises);
-
+            let result_sort = result.sort((a,b) => {
+                if(a.created_at < b.created_at) return 1;
+                if(a.created_at > b.created_at) return -1;
+                return 0;
+            })
             const total_page = Math.ceil(pages.length / 10);
             const last_page = total_page == page ? true : false;
-            const Result_Json = JSON.stringify(result);
+            const Result_Json = JSON.stringify(result_sort);
 
             const temp = JSON.parse(`${Result_Json}`);
             return res.status(200).json({
