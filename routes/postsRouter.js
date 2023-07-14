@@ -5,6 +5,7 @@ const multerS3 = require("multer-s3");
 const shortId = require("shortid");
 const AWS = require("aws-sdk");
 const auth = require("../middlewares/auth");
+const jwt = require("jsonwebtoken")
 const {
     Posts,
     Users,
@@ -143,6 +144,8 @@ router.get("/post/:id", async (req, res) => {
         // params로 postId 받기
         const { id } = req.params;
         const post_id = Number(id);
+        const { refresh, access } = req.headers;
+
         // 게시글 상세 조회
         const post = await Posts.findOne({
             attributes: [
@@ -194,8 +197,44 @@ router.get("/post/:id", async (req, res) => {
             ],
             raw: true,
         });
+        const result = [];
+        const promises = comments.map(async (item) => {
+            let like_check = false;
+            if(access){
+                const ACCESS_KEY = "howdoi_";
 
-        console.log(await Comments.count({where : {post_id}}))
+                const [accessType, accessToken] = access.split(" ");
+                const decodedAccess = jwt.verify(accessToken, ACCESS_KEY);
+                const { user_id } = decodedAccess.user_id
+            
+                const like_search = await PostsLikes.findOne({
+                    attributes: ["comment_id","user_id"],
+                    where:{ user_id: user_id, comment_id: item.comment_id},
+                    raw: true,
+                })
+                if(like_search){
+                    like_check = true;
+                }else{
+                    like_check = false;
+                }
+            }
+            const scroll_result = {
+                comment_id: item.comment_id,
+                user_id: item.user_id,
+                nickname: item.nickname,
+                user_type: item.user_type,
+                comment: item.comment,
+                image: item.image,
+                chosen: item.chosen,
+                like_num: item.like_num,
+                like_check: like_check,
+                created_at: item.created_at,
+                updated_at: item.updated_at,
+            };
+            result.push(scroll_result);
+        });
+        await Promise.all(promises);
+
         const comment_num = await Comments.count({where : {post_id}})
         await Posts.update(
             {
@@ -218,7 +257,7 @@ router.get("/post/:id", async (req, res) => {
         }
         // (comments O)
         else {
-            return res.status(200).json({ post, comments });
+            return res.status(200).json({ post, result });
         }
     } catch(error) {
         return res.status(400).json({ message: "게시글 조회에 실패했습니다." + error});
