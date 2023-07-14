@@ -159,24 +159,22 @@ router.get("/mystat", auth, async (req, res) => {
         const mypost = await Posts.findAll({
             where: { user_id }
         });
-        const mycomment = await Comment.findAll({
+        const mycomment = await Comments.findAll({
             where: { user_id }
         });
-        const mylikedcomment = await Comments.findAll({
-            attributes: [
-                "like_num"
-            ],
-            where: { user_id },
-            order: [["created_at", "DESC"]],
-            raw: true,
+        const mylikes = await Comments.sum('like_num', { where: { user_id } })
+
+        return res.status(200).json({
+            mypost: mypost.length,
+            mycomment: mycomment.length,
+            mylikes: mylikes
         });
-
-
+ 
     }catch(error){
         // 예외 처리
         return res
             .status(400)
-            .json({ message: "조회에 실패했습니다." + e });
+            .json({ message: "조회에 실패했습니다." + error });
     }
 })
 
