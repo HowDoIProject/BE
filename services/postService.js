@@ -61,12 +61,52 @@ class PostService {
         await this.PostRepository.deletePost({ post_id })
     }
 
-    detailPost = async ({ post_id }) => {
-        const post = await this.PostRepository.detailPost({ post_id })
+    detailPost = async ({ access, post_id }) => {
+        const item = await this.PostRepository.detailPost({ post_id })
+        const post = [];
+            let like_check = false;
+            let scrap_check = false;
+            if (access) {
+                const ACCESS_KEY = "howdoi_";
+
+                const [accessType, accessToken] = access.split(" ");
+                const decodedAccess = jwt.verify(accessToken, ACCESS_KEY);
+                const { user_id } = decodedAccess.user_id
+                const like_search = await this.PostLikeRepository.findByuserId({user_id,item})
+                if (like_search) {
+                    like_check = true;
+                } else {
+                    like_check = false;
+                }
+                const scrap_search = await this.PostScrapRepository.findByUserId({user_id,item})
+                if (like_search) {
+                    like_check = true;
+                } else {
+                    like_check = false;
+                }
+            }
+            const scroll_result = {
+                post_id: item.post_id,
+                user_id: item.user_id,
+                nickname: item.nickname,
+                user_type: item.user_type,
+                title: item.title,
+                content: item.content,
+                image: item.image,
+                like_num: item.like_num,
+                like_check: like_check,
+                scrap_num: item.scrap_num,
+                scrap_check: scrap_check,
+                created_at: item.created_at,
+                updated_at: item.updated_at,
+            };
+            post.push(scroll_result);
+
         const comments = await this.CommentRepository.detailComment({ post_id })
         return { post, comments }
     }
     detailComment = async ({ access,comments }) => {
+        console.log(comments)
         const result = [];
         const promises = comments.map(async (item) => {
             let like_check = false;

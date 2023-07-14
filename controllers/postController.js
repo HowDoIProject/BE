@@ -91,7 +91,7 @@ class PostController {
             const { refresh, access } = req.headers;
 
             // 게시글, 댓글 상세 조회
-            const { post, comments } = await this.PostService.detailPost({ post_id })
+            const { post, comments } = await this.PostService.detailPost({ access, post_id })
             // 게시글이 없을 경우
             if (!post) {
                 return res
