@@ -88,6 +88,7 @@ class PostController {
             // params로 postId 받기
             const { id } = req.params;
             const post_id = Number(id);
+            const { refresh, access } = req.headers;
 
             // 게시글, 댓글 상세 조회
             const { post, comments } = await this.PostService.detailPost({ post_id })
@@ -97,6 +98,7 @@ class PostController {
                     .status(400)
                     .json({ message: "존재하지 않는 게시글입니다." });
             }
+            const result = await this.PostService.detailComment({ access, comments })
 
             await this.PostService.updateCommentCount({ post_id })
 
@@ -107,9 +109,10 @@ class PostController {
             }
             // (comments O)
             else {
-                return res.status(200).json({ post, comments });
+                return res.status(200).json({ post, comment: result });
             }
         } catch (error) {
+            console.log(error)
             return res.status(400).json({ message: "게시글 조회에 실패했습니다." + error });
         }
     }

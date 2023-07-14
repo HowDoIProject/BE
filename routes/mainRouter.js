@@ -51,7 +51,7 @@ router.get("/recommend", auth, async (req, res) => {
         const [one, two, three] = category.split(",")
 
         // 비슷한 회원 검색
-        const target_user = await Users.findOne({
+        const target_user = await Users.findAll({
             where: { 
                 user_type,
                 age,
@@ -67,11 +67,14 @@ router.get("/recommend", auth, async (req, res) => {
                     ]
                 }
              },
+            limit: 3,
             raw: true,
         });
 
+        //비슷한 유저가 없을때
         if (target_user.length === 0){
             
+            //관심있는 카테고리와 일치하는 게시글을 보여준다.
             const recommend = await Posts.findAll({
                 attributes: [
                     "post_id",
@@ -103,43 +106,70 @@ router.get("/recommend", auth, async (req, res) => {
                         attributes: [],
                     },
                 ],
-                order: [["like_num", "DESC"]],
                 raw: true,
 
             })
         } else {
-            const recommend = await Posts.findAll({
-                attributes: [
-                    "post_id",
-                    "user_id",
-                    [sequelize.col("nickname"), "nickname"],
-                    [sequelize.col("user_type"), "user_type"],
-                    "title",
-                    "content",
-                    "image",
-                    "category",
-                    "scrap_num",
-                    "like_num",
-                    "comment_num",
-                    "created_at",
-                    "updated_at",
-                ],
-                where: {               
-                    
-                },
-                include: [
-                    {
-                        model: Users,
-                        attributes: [],
+            const result = [];
+            const promises_1 = target_user.map(async (item) => {
+                const posts = await PostsLikes.findAll({
+                    attributes: [
+                        "post_id"
+                    ],
+                    where: {
+                            [Op.and]: [
+                                {
+                                    created_at: {
+                                        [Op.lt]: d,
+                                    },
+                                },
+                                {
+                                    created_at: {
+                                        [Op.gte]: new Date(year, month-1, day),
+                                    },
+                                },
+                                {
+                                    user_id: item.user_id
+                                }
+                            ],
                     },
-                ],
-                order: [["like_num", "DESC"]],
-                raw: true,
+                    raw: true
+                })
 
+                const promises_2 = posts.map(async (item) => {
+                    const targetPosts = await Posts.findAll({
+                        attributes: [
+                            "post_id",
+                            "user_id",
+                            [sequelize.col("nickname"), "nickname"],
+                            [sequelize.col("user_type"), "user_type"],
+                            "title",
+                            "content",
+                            "image",
+                            "category",
+                            "scrap_num",
+                            "like_num",
+                            "comment_num",
+                            "created_at",
+                            "updated_at",
+                        ],
+                        where: {post_id: item.post_id},
+                        include: [
+                            {
+                                model: Users,
+                                attributes: [],
+                            },
+                        ],
+                        limit: 5,
+                        raw: true
+                    })
+                    
+                    result.push(targetPosts)
+                })
             })
+            
+            return res.status(200).json({ result });
         }
-
-        return res.status(200).json({ topfive });
     } catch (e) {
         // 예외 처리
         console.log(e);

@@ -1,9 +1,9 @@
-const { PostsLikes} = require("../models");
+const { PostsLikes } = require("../models");
 class PostLikeRepository {
-    constructor() {}
+    constructor() { }
 
-    findAllLikeByuserId = async({
-        comment_id, 
+    findAllLikeByuserId = async ({
+        comment_id,
         user_id
     }) => {
         return await PostsLikes.findAll({
@@ -12,8 +12,8 @@ class PostLikeRepository {
             raw: true,
         });
     }
-    findAllLikeByuserIdpostId = async({
-        post_id, 
+    findAllLikeByuserIdpostId = async ({
+        post_id,
         user_id
     }) => {
         return await PostsLikes.findAll({
@@ -23,7 +23,7 @@ class PostLikeRepository {
         });
     }
 
-    findAllLikeById = async({ comment_id }) => {
+    findAllLikeById = async ({ comment_id }) => {
         return await PostsLikes.findAll({
             attributes: ["comment_id", "user_id"],
             where: { comment_id },
@@ -31,22 +31,29 @@ class PostLikeRepository {
         });
     }
 
-    findAllLikeByPostId = async({ post_id }) => {
+    findAllLikeByPostId = async ({ post_id }) => {
         return await PostsLikes.findAll({
             attributes: ["post_id", "user_id"],
             where: { post_id },
             raw: true,
         });
     }
-    findByuserId = async ({user_id,item}) => {
+    findByuserId = async ({ user_id, item }) => {
         return await PostsLikes.findOne({
             attributes: ["post_id", "user_id"],
             where: { user_id: user_id, post_id: item.post_id },
             raw: true,
         })
     }
-    deleteLike = async({
-        comment_id, 
+    findBycommentId = async ({user_id,item}) => {
+        return await PostsLikes.findOne({
+            attributes: ["comment_id", "user_id"],
+            where: { user_id: user_id, comment_id: item.comment_id },
+            raw: true,
+        })
+    }
+    deleteLike = async ({
+        comment_id,
         user_id
     }) => {
         await PostsLikes.destroy({
@@ -56,8 +63,8 @@ class PostLikeRepository {
             },
         })
     }
-    deleteLikebyPostId = async({
-        post_id, 
+    deleteLikebyPostId = async ({
+        post_id,
         user_id
     }) => {
         await PostsLikes.destroy({
@@ -68,7 +75,7 @@ class PostLikeRepository {
         })
     }
 
-    createLike = async({
+    createLike = async ({
         comment_id,
         user_id
     }) => {
@@ -78,7 +85,7 @@ class PostLikeRepository {
         })
     }
 
-    createLikebyPostId = async({
+    createLikebyPostId = async ({
         post_id,
         user_id
     }) => {
@@ -88,8 +95,8 @@ class PostLikeRepository {
         })
     }
 
-    
- 
+
+
 }
 
 module.exports = PostLikeRepository;

@@ -5,6 +5,7 @@ const multerS3 = require("multer-s3");
 const shortId = require("shortid");
 const AWS = require("aws-sdk");
 const auth = require("../middlewares/auth");
+
 const PostController = require("../controllers/postController")
 const postcontroller = new PostController();
 
