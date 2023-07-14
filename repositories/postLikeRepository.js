@@ -52,6 +52,31 @@ class PostLikeRepository {
             raw: true,
         })
     }
+    findAllByDate = async({d,year,month,day,item}) => {
+        return await PostsLikes.findAll({
+            attributes: [
+                "post_id"
+            ],
+            where: {
+                    [Op.and]: [
+                        {
+                            created_at: {
+                                [Op.lt]: d,
+                            },
+                        },
+                        {
+                            created_at: {
+                                [Op.gte]: new Date(year, month-1, day),
+                            },
+                        },
+                        {
+                            user_id: item.user_id
+                        }
+                    ],
+            },
+            raw: true
+        })
+    }
     deleteLike = async ({
         comment_id,
         user_id

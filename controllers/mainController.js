@@ -87,6 +87,21 @@ class MainController {
             return res.status(400).json({ message: "검색에 실패했습니다." });
         }
     }
+    //추천게시물 조회
+    recommendPost = async (req, res) => {
+        try {
+            const { user_id } = res.locals.id;
+            const { user_type } = res.locals.type;
+            //추천게시글 찾기
+            const result = await this.MainService.recommentPost({ user_id,user_type })
+
+            return res.status(200).json({ result });
+        } catch (e) {
+            // 예외 처리
+            console.log(e);
+            return res.status(400).json({ message: "목록 조회에 실패했습니다." });
+        }
+    }
 
 }
 module.exports = MainController;

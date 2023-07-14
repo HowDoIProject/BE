@@ -165,6 +165,69 @@ class PostRepository {
             raw: true,
         });
     }
+    findAllByCatagory = async({one,two,three}) => {
+        return await Posts.findAll({
+            attributes: [
+                "post_id",
+                "user_id",
+                [sequelize.col("nickname"), "nickname"],
+                [sequelize.col("user_type"), "user_type"],
+                "title",
+                "content",
+                "image",
+                "category",
+                "scrap_num",
+                "like_num",
+                "comment_num",
+                "created_at",
+                "updated_at",
+            ],
+            where: {               
+                category: {
+                    [Op.or]: [
+                        {[Op.like]: "%" + one + "%"},
+                        {[Op.like]: "%" + two + "%"},
+                        {[Op.like]: "%" + three + "%"}
+                    ]
+                }
+            },
+            include: [
+                {
+                    model: Users,
+                    attributes: [],
+                },
+            ],
+            raw: true,
+        })
+    }
+    findAllBypostId = async({item}) => {
+        return await Posts.findAll({
+            attributes: [
+                "post_id",
+                "user_id",
+                [sequelize.col("nickname"), "nickname"],
+                [sequelize.col("user_type"), "user_type"],
+                "title",
+                "content",
+                "image",
+                "category",
+                "scrap_num",
+                "like_num",
+                "comment_num",
+                "created_at",
+                "updated_at",
+            ],
+            where: {post_id: item.post_id},
+            include: [
+                {
+                    model: Users,
+                    attributes: [],
+                },
+            ],
+            limit: 5,
+            raw: true
+        })
+    }
     createPost = async ({
         user_id,
         nickname,
