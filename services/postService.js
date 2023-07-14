@@ -92,7 +92,7 @@ class PostService {
                 user_type: item.user_type,
                 title: item.title,
                 content: item.content,
-                cartegory: item.cartegory,
+                category: item.category,
                 image: item.image,
                 like_num: item.like_num,
                 like_check: like_check,
