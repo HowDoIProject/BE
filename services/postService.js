@@ -106,8 +106,7 @@ class PostService {
         return { post, comments }
     }
     detailComment = async ({ access,comments }) => {
-        console.log(comments)
-        const result = [];
+        const raw_result = [];
         const promises = comments.map(async (item) => {
             let like_check = false;
             if (access) {
@@ -137,9 +136,15 @@ class PostService {
                 created_at: item.created_at,
                 updated_at: item.updated_at,
             };
-            result.push(scroll_result);
+            raw_result.push(scroll_result);
         });
         await Promise.all(promises);
+        let result = raw_result.sort((a,b) => {
+            if(a.created_at < b.created_at) return 1;
+            if(a.created_at > b.created_at) return -1;
+            return 0;
+        })
+
         return result;
     }
 
