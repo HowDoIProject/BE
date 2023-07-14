@@ -38,6 +38,13 @@ class PostLikeRepository {
             raw: true,
         });
     }
+    findByuserId = async ({user_id,item}) => {
+        return await PostsLikes.findOne({
+            attributes: ["post_id", "user_id"],
+            where: { user_id: user_id, post_id: item.post_id },
+            raw: true,
+        })
+    }
     deleteLike = async({
         comment_id, 
         user_id
