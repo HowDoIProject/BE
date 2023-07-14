@@ -79,10 +79,10 @@ class PostService {
                     like_check = false;
                 }
                 const scrap_search = await this.PostScrapRepository.findByUserId({user_id,item})
-                if (like_search) {
-                    like_check = true;
+                if (scrap_search) {
+                    scrap_check = true;
                 } else {
-                    like_check = false;
+                    scrap_check = false;
                 }
             }
             const scroll_result = {
@@ -92,6 +92,7 @@ class PostService {
                 user_type: item.user_type,
                 title: item.title,
                 content: item.content,
+                cartegory: item.cartegory,
                 image: item.image,
                 like_num: item.like_num,
                 like_check: like_check,
