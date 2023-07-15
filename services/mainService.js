@@ -90,6 +90,7 @@ class MainService {
 
     serchPost = async ({ keyword, page, access }) => {
         const post_search = await this.PostRepository.getPostByKeyword({ keyword, page })
+        console.log(post_search)
         const result = [];
         const promises = post_search.map(async (item) => {
             let like_check = false;

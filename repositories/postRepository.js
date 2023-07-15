@@ -7,6 +7,35 @@ class PostRepository {
         const targetPost = await Posts.findOne({ where: { post_id } });
         return targetPost
     }
+    findAllPost = async({page}) => {
+        return await Posts.findAll({
+            attributes: [
+                "post_id",
+                "user_id",
+                [sequelize.col("nickname"), "nickname"],
+                [sequelize.col("user_type"), "user_type"],
+                "title",
+                "content",
+                "image",
+                "category",
+                "scrap_num",
+                "like_num",
+                "comment_num",
+                "created_at",
+                "updated_at",
+            ],
+            include: [
+                {
+                    model: Users,
+                    attributes: [],
+                },
+            ],
+            order: [["created_at", "DESC"]],
+            offset: (page - 1) * 10,
+            limit: 10,
+            raw: true,
+        });
+    }
     getAllPost = async () => {
         return await Posts.findAll({
             attributes: [
@@ -200,6 +229,64 @@ class PostRepository {
             raw: true,
         })
     }
+    findByCategory = async({ category }) => {
+        return await Posts.findAll({
+            attributes: [
+                "post_id",
+                "user_id",
+                [sequelize.col("nickname"), "nickname"],
+                [sequelize.col("user_type"), "user_type"],
+                "title",
+                "content",
+                "image",
+                "category",
+                "scrap_num",
+                "like_num",
+                "comment_num",
+                "created_at",
+                "updated_at",
+            ],
+            where: { category },
+            include: [
+                {
+                    model: Users,
+                    attributes: [],
+                },
+            ],
+            order: [["created_at", "DESC"]],
+            raw: true,
+        });
+    }
+    findLimitPostByCategory = async({ category, page }) => {
+        return await Posts.findAll({
+            attributes: [
+                "post_id",
+                "user_id",
+                [sequelize.col("nickname"), "nickname"],
+                [sequelize.col("user_type"), "user_type"],
+                "title",
+                "content",
+                "image",
+                "category",
+                "scrap_num",
+                "like_num",
+                "comment_num",
+                "created_at",
+                "updated_at",
+            ],
+            where: { category },
+            include: [
+                {
+                    model: Users,
+                    attributes: [],
+                },
+            ],
+            order: [["created_at", "DESC"]],
+            offset: (page - 1) * 10,
+            limit: 10,
+            raw: true,
+        });
+    }
     findAllBypostId = async({item}) => {
         return await Posts.findAll({
             attributes: [
@@ -227,6 +314,132 @@ class PostRepository {
             limit: 5,
             raw: true
         })
+    }
+    findAllByfilter = async({filter}) => {
+        return await Posts.findAll({
+            attributes: [
+                "post_id",
+                "user_id",
+                [sequelize.col("nickname"), "nickname"],
+                [sequelize.col("user_type"), "user_type"],
+                "title",
+                "content",
+                "image",
+                "category",
+                "scrap_num",
+                "like_num",
+                "comment_num",
+                "created_at",
+                "updated_at",
+            ],
+            include: [
+                {
+                    model: Users,
+                    attributes: [],
+                    where: {
+                        user_type: filter,
+                    },
+                },
+            ],
+            order: [["created_at", "DESC"]],
+            raw: true,
+        });
+    }
+    findByfilter = async({filter, page}) => {
+        return await Posts.findAll({
+            attributes: [
+                "post_id",
+                "user_id",
+                [sequelize.col("nickname"), "nickname"],
+                [sequelize.col("user_type"), "user_type"],
+                "title",
+                "content",
+                "image",
+                "category",
+                "scrap_num",
+                "like_num",
+                "comment_num",
+                "created_at",
+                "updated_at",
+            ],
+            include: [
+                {
+                    model: Users,
+                    attributes: [],
+                    where: {
+                        user_type: filter,
+                    },
+                },
+            ],
+            order: [["created_at", "DESC"]],
+            offset: (page - 1) * 10,
+            limit: 10,
+            raw: true,
+        });
+    }
+    findAllByCategoryFilter = async({ category, filter }) => {
+        return await Posts.findAll({
+            attributes: [
+                "post_id",
+                "user_id",
+                [sequelize.col("nickname"), "nickname"],
+                [sequelize.col("user_type"), "user_type"],
+                "title",
+                "content",
+                "image",
+                "category",
+                "scrap_num",
+                "like_num",
+                "comment_num",
+                "created_at",
+                "updated_at",
+            ],
+            where: { category },
+            include: [
+                {
+                    model: Users,
+                    attributes: [],
+                    where: {
+                        user_type: filter,
+                    },
+                },
+            ],
+            order: [["created_at", "DESC"]],
+            raw: true,
+        });
+    }
+    findLimitByCategoryFilter = async({category, filter,page}) => {
+        return await Posts.findAll({
+            attributes: [
+                "post_id",
+                "user_id",
+                [sequelize.col("nickname"), "nickname"],
+                [sequelize.col("user_type"), "user_type"],
+                "title",
+                "content",
+                "image",
+                "category",
+                "scrap_num",
+                "like_num",
+                "comment_num",
+                "created_at",
+                "updated_at",
+            ],
+            where: { category },
+            include: [
+                {
+                    model: Users,
+                    attributes: [],
+                    where: {
+                        user_type: filter,
+                    },
+                },
+            ],
+            order: [["created_at", "DESC"]],
+            offset: (page - 1) * 10,
+            limit: 10,
+            raw: true,
+        });
     }
     createPost = async ({
         user_id,
@@ -332,6 +545,9 @@ class PostRepository {
                 where: { post_id: post_id },
             }
         );
+    }
+    postCount = async() => {
+        return await Posts.count();
     }
 
 }
