@@ -165,6 +165,48 @@ class PostRepository {
             raw: true,
         });
     }
+    getPostByKeywordPage = async ({ keyword }) => {
+        const pages = await Posts.findAll({
+            attributes: [
+                "post_id",
+                "user_id",
+                [sequelize.col("nickname"), "nickname"],
+                [sequelize.col("user_type"), "user_type"],
+                "title",
+                "content",
+                "image",
+                "category",
+                "scrap_num",
+                "like_num",
+                "comment_num",
+                "created_at",
+                "updated_at",
+            ],
+            include: [
+                {
+                    model: Users,
+                    attributes: [],
+                },
+            ],
+            where: {
+                [Op.or]: [
+                    {
+                        title: {
+                            [Op.like]: "%" + keyword + "%",
+                        },
+                    },
+                    {
+                        content: {
+                            [Op.like]: "%" + keyword + "%",
+                        },
+                    },
+                ],
+            },
+            order: [["created_at", "DESC"]],
+            raw: true,
+        });
+        return pages.length
+    }
     createPost = async ({
         user_id,
         nickname,
