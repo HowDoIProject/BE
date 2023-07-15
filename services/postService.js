@@ -62,6 +62,11 @@ class PostService {
     }
 
     detailPost = async ({ access, post_id }) => {
+        const check = await this.CommentRepository.findChosenComment({post_id})
+        let ischosen = false;
+        if(check.length !== 0) {
+            ischosen = true;
+        }
         const item = await this.PostRepository.detailPost({ post_id })
         const post = [];
             let like_check = false;
@@ -90,6 +95,7 @@ class PostService {
                 user_id: item.user_id,
                 nickname: item.nickname,
                 user_type: item.user_type,
+                ischosen: ischosen,
                 title: item.title,
                 content: item.content,
                 category: item.category,

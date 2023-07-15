@@ -121,6 +121,13 @@ class CommentRepository {
         });
     }
 
+    findChosenComment = async({ post_id }) => {
+        return await Comments.findAll({
+            where: { post_id, chosen: 1 },
+            raw: true,
+        });
+    }
+
     countComment = async({ post_id }) => {
         return await Comments.count({ where: { post_id } })
     }
