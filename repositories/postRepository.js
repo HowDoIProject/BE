@@ -1,4 +1,4 @@
-const { Posts, Users, sequelize, } = require("../models");
+const { Posts, Users, sequelize, PostsScraps } = require("../models");
 const { Op } = require("sequelize");
 class PostRepository {
     constructor() { }
@@ -441,6 +441,130 @@ class PostRepository {
             raw: true,
         });
     }
+    findAllPostscrapByUserId = async({user_id, page}) => {
+        return await Posts.findAll({
+            attributes: [
+                "post_id",
+                "user_id",
+                "title",
+                "content",
+                "image",
+                "category",
+                "scrap_num",
+                "like_num",
+                "comment_num",
+                "created_at",
+                "updated_at",
+            ],
+            include: [
+                {
+                    model: PostsScraps,
+                    where: { user_id: user_id.user_id },
+                    include: [
+                        {
+                            model: Users,
+                        },
+                    ],
+                },
+            ],
+            order: [["created_at", "DESC"]],
+            offset: (page - 1) * 10,
+            limit: 10,
+            raw: true,
+        });
+    }
+    findAllPostscrapByCategory = async({user_id, category, page}) => {
+        return await Posts.findAll({
+            attributes: [
+                "post_id",
+                "user_id",
+                "title",
+                "content",
+                "image",
+                "category",
+                "scrap_num",
+                "like_num",
+                "comment_num",
+                "created_at",
+                "updated_at",
+            ],
+            include: [
+                {
+                    model: PostsScraps,
+                    where: { user_id: user_id.user_id },
+                    include: [
+                        {
+                            model: Users,
+                        },
+                    ],
+                },
+            ],
+            where: { category },
+            order: [["created_at", "DESC"]],
+            offset: (page - 1) * 10,
+            limit: 10,
+            raw: true,
+        });
+    }
+    findAllPostscrapOrderByPostId = async({user_id}) => {
+        return await Posts.findAll({
+            attributes: [
+                "post_id",
+                "user_id",
+                "title",
+                "content",
+                "image",
+                "category",
+                "scrap_num",
+                "like_num",
+                "created_at",
+                "updated_at",
+            ],
+            include: [
+                {
+                    model: PostsScraps,
+                    where: { user_id: user_id.user_id },
+                    include: [
+                        {
+                            model: Users,
+                        },
+                    ],
+                },
+            ],
+            order: [["post_id", "DESC"]],
+            raw: true,
+        });
+    }
+    findscrapByCategory = async({user_id, category}) => {
+        return await Posts.findAll({
+            attributes: [
+                "post_id",
+                "user_id",
+                "title",
+                "content",
+                "image",
+                "category",
+                "scrap_num",
+                "like_num",
+                "created_at",
+                "updated_at",
+            ],
+            include: [
+                {
+                    model: PostsScraps,
+                    where: { user_id: user_id.user_id },
+                    include: [
+                        {
+                            model: Users,
+                        },
+                    ],
+                },
+            ],
+            where: { category },
+            order: [["created_at", "DESC"]],
+            raw: true,
+        });
+    }
     createPost = async ({
         user_id,
         nickname,
@@ -482,6 +606,11 @@ class PostRepository {
     deletePost = async ({ post_id }) => {
         await Posts.destroy({
             where: { post_id },
+        })
+    }
+    deleteScrap = async({item}) => {
+        await Posts.destroy({
+            where: { post_id: item.post_id },
         })
     }
 
