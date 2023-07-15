@@ -159,7 +159,7 @@ router.get("/mystat", auth, async (req, res) => {
         const mypost = await Posts.findAll({
             where: { user_id }
         });
-        const mycomment = await Comment.findAll({
+        const mycomment = await Comments.findAll({
             where: { user_id }
         });
         const mylikedcomment = await Comments.findAll({
