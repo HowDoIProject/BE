@@ -565,6 +565,69 @@ class PostRepository {
             raw: true,
         });
     }
+    getAllMypage = async({user_id}) => {
+        return await Posts.findAll({
+            attributes: [
+                "post_id",
+                "user_id",
+                [sequelize.col("nickname"), "nickname"],
+                [sequelize.col("user_type"), "user_type"],
+                "title",
+                "content",
+                "image",
+                "category",
+                "scrap_num",
+                "like_num",
+                "comment_num",
+                "created_at",
+                "updated_at",
+            ],
+            where: { user_id: user_id.user_id },
+            include: [
+                {
+                    model: Users,
+                    attributes: [],
+                },
+            ],
+            order: [["created_at", "DESC"]],
+            raw: true,
+        });
+    }
+    getMypage = async({user_id, page}) => {
+        return await Posts.findAll({
+            attributes: [
+                "post_id",
+                "user_id",
+                [sequelize.col("nickname"), "nickname"],
+                [sequelize.col("user_type"), "user_type"],
+                "title",
+                "content",
+                "image",
+                "category",
+                "scrap_num",
+                "like_num",
+                "comment_num",
+                "created_at",
+                "updated_at",
+            ],
+            where: { user_id: user_id.user_id },
+            include: [
+                {
+                    model: Users,
+                    attributes: [],
+                },
+            ],
+            order: [["created_at", "DESC"]],
+            offset: (page - 1) * 10,
+            limit: 10,
+            raw: true,
+        });
+    }
+    findAllPosts = async({user_id}) => {
+        return await Posts.findAll({
+            where: { user_id }
+        });
+    }
     createPost = async ({
         user_id,
         nickname,

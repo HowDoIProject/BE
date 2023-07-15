@@ -1,4 +1,4 @@
-const { Users, Comments, PostsLikes, sequelize } = require("../models");
+const { Users, Comments, sequelize } = require("../models");
 const { Op } = require("sequelize");
 class CommentRepository {
     constructor() { }
@@ -43,7 +43,14 @@ class CommentRepository {
             }
         )
     }
-
+    findAllComment = async() => {
+        return await Comments.findAll({
+            where: { user_id }
+        });
+    }
+    sumAllComment = async({user_id}) => {
+        return await Comments.sum('like_num', { where: { user_id } })
+    }
     findAllCommentById = async({
         post_id, 
     }) => {
@@ -70,7 +77,80 @@ class CommentRepository {
             raw: true,
         });
     }
-
+    findAllCommentByUserId = async({user_id}) => {
+        return await Comments.findAll({
+            attributes: [
+                "comment_id",
+                "user_id",
+                "comment",
+                "image",
+                "chosen",
+                [sequelize.col("category"), "category"],
+                "created_at",
+                "updated_at",
+            ],
+            where: { user_id: user_id.user_id },
+            include: [
+                {
+                    model: Posts,
+                    attributes: [],
+                },
+            ],
+            order: [["created_at", "DESC"]],
+            raw: true,
+        });
+    }
+    getChosenComment = async({user_id}) => {
+        return await Comments.findAll({
+            attributes: [
+                "comment_id",
+                "user_id",
+                "post_id",
+                "comment",
+                "image",
+                "chosen",
+                [sequelize.col("category"), "category"],
+                "created_at",
+                "updated_at",
+            ],
+            where: { chosen: 1 },
+            include: [
+                {
+                    model: Posts,
+                    attributes: [],
+                    where: {
+                        user_id: user_id.user_id,
+                    },
+                },
+            ],
+            order: [["created_at", "DESC"]],
+            raw: true,
+        });
+    }
+    getMyChosenComment = async({user_id}) => {
+        return await Comments.findAll({
+            attributes: [
+                "comment_id",
+                "user_id",
+                "post_id",
+                "comment",
+                "image",
+                "chosen",
+                [sequelize.col("category"), "category"],
+                "created_at",
+                "updated_at",
+            ],
+            where: { chosen: 1, user_id:user_id.user_id },
+            include: [
+                {
+                    model: Posts,
+                    attributes: [],
+                },
+            ],
+            order: [["created_at", "DESC"]],
+            raw: true,
+        });
+    }
     chooseComment = async({
         post_id, 
         comment_id
