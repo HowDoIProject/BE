@@ -89,6 +89,8 @@ class MainService {
     }
 
     serchPost = async ({ keyword, page, access }) => {
+        const pages = await this.PostRepository.getPostByKeywordPage({ keyword })
+
         const post_search = await this.PostRepository.getPostByKeyword({ keyword, page })
         console.log(post_search)
         const result = [];
@@ -136,7 +138,7 @@ class MainService {
         });
         await Promise.all(promises);
 
-        const total_page = 5;
+        const total_page = Math.ceil(pages / 10);
         const last_page = total_page == page ? true : false;
 
         const Result_Json = JSON.stringify(result);

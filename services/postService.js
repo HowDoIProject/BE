@@ -61,13 +61,59 @@ class PostService {
         await this.PostRepository.deletePost({ post_id })
     }
 
-    detailPost = async ({ post_id }) => {
-        const post = await this.PostRepository.detailPost({ post_id })
+    detailPost = async ({ access, post_id }) => {
+        const check = await this.CommentRepository.findChosenComment({post_id})
+        let ischosen = false;
+        if(check.length !== 0) {
+            ischosen = true;
+        }
+        const item = await this.PostRepository.detailPost({ post_id })
+        const post = [];
+            let like_check = false;
+            let scrap_check = false;
+            if (access) {
+                const ACCESS_KEY = "howdoi_";
+
+                const [accessType, accessToken] = access.split(" ");
+                const decodedAccess = jwt.verify(accessToken, ACCESS_KEY);
+                const { user_id } = decodedAccess.user_id
+                const like_search = await this.PostLikeRepository.findByuserId({user_id,item})
+                if (like_search) {
+                    like_check = true;
+                } else {
+                    like_check = false;
+                }
+                const scrap_search = await this.PostScrapRepository.findByUserId({user_id,item})
+                if (scrap_search) {
+                    scrap_check = true;
+                } else {
+                    scrap_check = false;
+                }
+            }
+            const scroll_result = {
+                post_id: item.post_id,
+                user_id: item.user_id,
+                nickname: item.nickname,
+                user_type: item.user_type,
+                ischosen: ischosen,
+                title: item.title,
+                content: item.content,
+                category: item.category,
+                image: item.image,
+                like_num: item.like_num,
+                like_check: like_check,
+                scrap_num: item.scrap_num,
+                scrap_check: scrap_check,
+                created_at: item.created_at,
+                updated_at: item.updated_at,
+            };
+            post.push(scroll_result);
+
         const comments = await this.CommentRepository.detailComment({ post_id })
         return { post, comments }
     }
     detailComment = async ({ access,comments }) => {
-        const result = [];
+        const raw_result = [];
         const promises = comments.map(async (item) => {
             let like_check = false;
             if (access) {
@@ -97,9 +143,15 @@ class PostService {
                 created_at: item.created_at,
                 updated_at: item.updated_at,
             };
-            result.push(scroll_result);
+            raw_result.push(scroll_result);
         });
         await Promise.all(promises);
+        let result = raw_result.sort((a,b) => {
+            if(a.created_at < b.created_at) return 1;
+            if(a.created_at > b.created_at) return -1;
+            return 0;
+        })
+
         return result;
     }
 

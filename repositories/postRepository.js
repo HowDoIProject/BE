@@ -247,12 +247,14 @@ class PostRepository {
                 "updated_at",
             ],
             where: { category },
+
             include: [
                 {
                     model: Users,
                     attributes: [],
                 },
             ],
+
             order: [["created_at", "DESC"]],
             raw: true,
         });
