@@ -1,4 +1,4 @@
-const { Posts, Users, sequelize, } = require("../models");
+const { Posts, Users, sequelize, PostsScraps } = require("../models");
 const { Op } = require("sequelize");
 class PostRepository {
     constructor() { }
@@ -6,6 +6,35 @@ class PostRepository {
     checkPost = async ({ post_id }) => {
         const targetPost = await Posts.findOne({ where: { post_id } });
         return targetPost
+    }
+    findAllPost = async({page}) => {
+        return await Posts.findAll({
+            attributes: [
+                "post_id",
+                "user_id",
+                [sequelize.col("nickname"), "nickname"],
+                [sequelize.col("user_type"), "user_type"],
+                "title",
+                "content",
+                "image",
+                "category",
+                "scrap_num",
+                "like_num",
+                "comment_num",
+                "created_at",
+                "updated_at",
+            ],
+            include: [
+                {
+                    model: Users,
+                    attributes: [],
+                },
+            ],
+            order: [["created_at", "DESC"]],
+            offset: (page - 1) * 10,
+            limit: 10,
+            raw: true,
+        });
     }
     getAllPost = async () => {
         return await Posts.findAll({
@@ -165,8 +194,131 @@ class PostRepository {
             raw: true,
         });
     }
-    getPostByKeywordPage = async ({ keyword }) => {
-        const pages = await Posts.findAll({
+    findAllByCatagory = async({one,two,three}) => {
+        return await Posts.findAll({
+            attributes: [
+                "post_id",
+                "user_id",
+                [sequelize.col("nickname"), "nickname"],
+                [sequelize.col("user_type"), "user_type"],
+                "title",
+                "content",
+                "image",
+                "category",
+                "scrap_num",
+                "like_num",
+                "comment_num",
+                "created_at",
+                "updated_at",
+            ],
+            where: {               
+                category: {
+                    [Op.or]: [
+                        {[Op.like]: "%" + one + "%"},
+                        {[Op.like]: "%" + two + "%"},
+                        {[Op.like]: "%" + three + "%"}
+                    ]
+                }
+            },
+            include: [
+                {
+                    model: Users,
+                    attributes: [],
+                },
+            ],
+            raw: true,
+        })
+    }
+    findByCategory = async({ category }) => {
+        return await Posts.findAll({
+            attributes: [
+                "post_id",
+                "user_id",
+                [sequelize.col("nickname"), "nickname"],
+                [sequelize.col("user_type"), "user_type"],
+                "title",
+                "content",
+                "image",
+                "category",
+                "scrap_num",
+                "like_num",
+                "comment_num",
+                "created_at",
+                "updated_at",
+            ],
+            where: { category },
+
+            include: [
+                {
+                    model: Users,
+                    attributes: [],
+                },
+            ],
+
+            order: [["created_at", "DESC"]],
+            raw: true,
+        });
+    }
+    findLimitPostByCategory = async({ category, page }) => {
+        return await Posts.findAll({
+            attributes: [
+                "post_id",
+                "user_id",
+                [sequelize.col("nickname"), "nickname"],
+                [sequelize.col("user_type"), "user_type"],
+                "title",
+                "content",
+                "image",
+                "category",
+                "scrap_num",
+                "like_num",
+                "comment_num",
+                "created_at",
+                "updated_at",
+            ],
+            where: { category },
+            include: [
+                {
+                    model: Users,
+                    attributes: [],
+                },
+            ],
+            order: [["created_at", "DESC"]],
+            offset: (page - 1) * 10,
+            limit: 10,
+            raw: true,
+        });
+    }
+    findAllBypostId = async({item}) => {
+        return await Posts.findAll({
+            attributes: [
+                "post_id",
+                "user_id",
+                [sequelize.col("nickname"), "nickname"],
+                [sequelize.col("user_type"), "user_type"],
+                "title",
+                "content",
+                "image",
+                "category",
+                "scrap_num",
+                "like_num",
+                "comment_num",
+                "created_at",
+                "updated_at",
+            ],
+            where: {post_id: item.post_id},
+            include: [
+                {
+                    model: Users,
+                    attributes: [],
+                },
+            ],
+            limit: 5,
+            raw: true
+        })
+    }
+    findAllByfilter = async({filter}) => {
+        return await Posts.findAll({
             attributes: [
                 "post_id",
                 "user_id",
@@ -186,26 +338,297 @@ class PostRepository {
                 {
                     model: Users,
                     attributes: [],
+                    where: {
+                        user_type: filter,
+                    },
                 },
             ],
-            where: {
-                [Op.or]: [
-                    {
-                        title: {
-                            [Op.like]: "%" + keyword + "%",
-                        },
-                    },
-                    {
-                        content: {
-                            [Op.like]: "%" + keyword + "%",
-                        },
-                    },
-                ],
-            },
             order: [["created_at", "DESC"]],
             raw: true,
         });
-        return pages.length
+    }
+    findByfilter = async({filter, page}) => {
+        return await Posts.findAll({
+            attributes: [
+                "post_id",
+                "user_id",
+                [sequelize.col("nickname"), "nickname"],
+                [sequelize.col("user_type"), "user_type"],
+                "title",
+                "content",
+                "image",
+                "category",
+                "scrap_num",
+                "like_num",
+                "comment_num",
+                "created_at",
+                "updated_at",
+            ],
+            include: [
+                {
+                    model: Users,
+                    attributes: [],
+                    where: {
+                        user_type: filter,
+                    },
+                },
+            ],
+            order: [["created_at", "DESC"]],
+            offset: (page - 1) * 10,
+            limit: 10,
+            raw: true,
+        });
+    }
+    findAllByCategoryFilter = async({ category, filter }) => {
+        return await Posts.findAll({
+            attributes: [
+                "post_id",
+                "user_id",
+                [sequelize.col("nickname"), "nickname"],
+                [sequelize.col("user_type"), "user_type"],
+                "title",
+                "content",
+                "image",
+                "category",
+                "scrap_num",
+                "like_num",
+                "comment_num",
+                "created_at",
+                "updated_at",
+            ],
+            where: { category },
+            include: [
+                {
+                    model: Users,
+                    attributes: [],
+                    where: {
+                        user_type: filter,
+                    },
+                },
+            ],
+            order: [["created_at", "DESC"]],
+            raw: true,
+        });
+    }
+    findLimitByCategoryFilter = async({category, filter,page}) => {
+        return await Posts.findAll({
+            attributes: [
+                "post_id",
+                "user_id",
+                [sequelize.col("nickname"), "nickname"],
+                [sequelize.col("user_type"), "user_type"],
+                "title",
+                "content",
+                "image",
+                "category",
+                "scrap_num",
+                "like_num",
+                "comment_num",
+                "created_at",
+                "updated_at",
+            ],
+            where: { category },
+            include: [
+                {
+                    model: Users,
+                    attributes: [],
+                    where: {
+                        user_type: filter,
+                    },
+                },
+            ],
+            order: [["created_at", "DESC"]],
+            offset: (page - 1) * 10,
+            limit: 10,
+            raw: true,
+        });
+    }
+    findAllPostscrapByUserId = async({user_id, page}) => {
+        return await Posts.findAll({
+            attributes: [
+                "post_id",
+                "user_id",
+                "title",
+                "content",
+                "image",
+                "category",
+                "scrap_num",
+                "like_num",
+                "comment_num",
+                "created_at",
+                "updated_at",
+            ],
+            include: [
+                {
+                    model: PostsScraps,
+                    where: { user_id: user_id.user_id },
+                    include: [
+                        {
+                            model: Users,
+                        },
+                    ],
+                },
+            ],
+            order: [["created_at", "DESC"]],
+            offset: (page - 1) * 10,
+            limit: 10,
+            raw: true,
+        });
+    }
+    findAllPostscrapByCategory = async({user_id, category, page}) => {
+        return await Posts.findAll({
+            attributes: [
+                "post_id",
+                "user_id",
+                "title",
+                "content",
+                "image",
+                "category",
+                "scrap_num",
+                "like_num",
+                "comment_num",
+                "created_at",
+                "updated_at",
+            ],
+            include: [
+                {
+                    model: PostsScraps,
+                    where: { user_id: user_id.user_id },
+                    include: [
+                        {
+                            model: Users,
+                        },
+                    ],
+                },
+            ],
+            where: { category },
+            order: [["created_at", "DESC"]],
+            offset: (page - 1) * 10,
+            limit: 10,
+            raw: true,
+        });
+    }
+    findAllPostscrapOrderByPostId = async({user_id}) => {
+        return await Posts.findAll({
+            attributes: [
+                "post_id",
+                "user_id",
+                "title",
+                "content",
+                "image",
+                "category",
+                "scrap_num",
+                "like_num",
+                "created_at",
+                "updated_at",
+            ],
+            include: [
+                {
+                    model: PostsScraps,
+                    where: { user_id: user_id.user_id },
+                    include: [
+                        {
+                            model: Users,
+                        },
+                    ],
+                },
+            ],
+            order: [["post_id", "DESC"]],
+            raw: true,
+        });
+    }
+    findscrapByCategory = async({user_id, category}) => {
+        return await Posts.findAll({
+            attributes: [
+                "post_id",
+                "user_id",
+                "title",
+                "content",
+                "image",
+                "category",
+                "scrap_num",
+                "like_num",
+                "created_at",
+                "updated_at",
+            ],
+            include: [
+                {
+                    model: PostsScraps,
+                    where: { user_id: user_id.user_id },
+                    include: [
+                        {
+                            model: Users,
+                        },
+                    ],
+                },
+            ],
+            where: { category },
+            order: [["created_at", "DESC"]],
+            raw: true,
+        });
+    }
+    getAllMypage = async({user_id}) => {
+        return await Posts.findAll({
+            attributes: [
+                "post_id",
+                "user_id",
+                [sequelize.col("nickname"), "nickname"],
+                [sequelize.col("user_type"), "user_type"],
+                "title",
+                "content",
+                "image",
+                "category",
+                "scrap_num",
+                "like_num",
+                "comment_num",
+                "created_at",
+                "updated_at",
+            ],
+            where: { user_id: user_id.user_id },
+            include: [
+                {
+                    model: Users,
+                    attributes: [],
+                },
+            ],
+            order: [["created_at", "DESC"]],
+            raw: true,
+        });
+    }
+    getMypage = async({user_id, page}) => {
+        return await Posts.findAll({
+            attributes: [
+                "post_id",
+                "user_id",
+                [sequelize.col("nickname"), "nickname"],
+                [sequelize.col("user_type"), "user_type"],
+                "title",
+                "content",
+                "image",
+                "category",
+                "scrap_num",
+                "like_num",
+                "comment_num",
+                "created_at",
+                "updated_at",
+            ],
+            where: { user_id: user_id.user_id },
+            include: [
+                {
+                    model: Users,
+                    attributes: [],
+                },
+            ],
+            order: [["created_at", "DESC"]],
+            offset: (page - 1) * 10,
+            limit: 10,
+            raw: true,
+        });
+    }
+    findAllPosts = async({user_id}) => {
+        return await Posts.findAll({
+            where: { user_id }
+        });
     }
     createPost = async ({
         user_id,
@@ -248,6 +671,11 @@ class PostRepository {
     deletePost = async ({ post_id }) => {
         await Posts.destroy({
             where: { post_id },
+        })
+    }
+    deleteScrap = async({item}) => {
+        await Posts.destroy({
+            where: { post_id: item.post_id },
         })
     }
 
@@ -311,6 +739,9 @@ class PostRepository {
                 where: { post_id: post_id },
             }
         );
+    }
+    postCount = async() => {
+        return await Posts.count();
     }
 
 }

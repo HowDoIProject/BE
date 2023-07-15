@@ -1,6 +1,7 @@
 const PostRepository = require("../repositories/postRepository")
 const PostLikeRepository = require("../repositories/postLikeRepository")
 const PostScrapRepository = require("../repositories/postScrapRepository")
+const UsersRepository = require("../repositories/UsersRepository")
 const jwt = require("jsonwebtoken");
 
 class MainService {
@@ -8,6 +9,7 @@ class MainService {
         this.PostRepository = new PostRepository();
         this.PostLikeRepository = new PostLikeRepository();
         this.PostScrapRepository = new PostScrapRepository();
+        this.UsersRepository = new UsersRepository();
     }
     getAllPost = async () => {
         return await this.PostRepository.getAllPost();
@@ -90,6 +92,7 @@ class MainService {
         const pages = await this.PostRepository.getPostByKeywordPage({ keyword })
 
         const post_search = await this.PostRepository.getPostByKeyword({ keyword, page })
+        console.log(post_search)
         const result = [];
         const promises = post_search.map(async (item) => {
             let like_check = false;
@@ -101,13 +104,13 @@ class MainService {
                 const decodedAccess = jwt.verify(accessToken, ACCESS_KEY);
                 const { user_id } = decodedAccess.user_id
 
-                const like_search = await this.PostLikeRepository.findByuserId({user_id,item})
+                const like_search = await this.PostLikeRepository.findByuserId({ user_id, item })
                 if (like_search) {
                     like_check = true;
                 } else {
                     like_check = false;
                 }
-                const scrap_search = await this.PostScrapRepository.findByUserId({user_id,item})
+                const scrap_search = await this.PostScrapRepository.findByUserId({ user_id, item })
                 if (scrap_search) {
                     scrap_check = true;
                 } else {
@@ -148,6 +151,40 @@ class MainService {
         };
     }
 
-}
+    recommentPost = async({user_id,user_type}) => {
+        const d = new Date();
+    
+        const year = d.getFullYear();
+        const month = d.getMonth();
+        const day = d.getDate();
+        
+        const { age } = await this.UsersRepository.checkUserAge({user_id})
+        const { gender } = await this.UsersRepository.checkUserGender({user_id})
+        const { category } = await this.UsersRepository.checkUserCategory({user_id})
+        const [one, two, three] = category.split(",")
+        // 비슷한 회원 검색
+        const target_user = await this.UsersRepository.findAllUser({ user_type, age, gender, user_id, one, two, three })
+        
+        //비슷한 유저가 없을때
+        if (target_user.length === 0){
+
+            //관심있는 카테고리와 일치하는 게시글을 보여준다.
+            return await this.PostRepository.findAllByCatagory({one,two,three})
+            
+        } else {
+            const result = [];
+            const promises_1 = target_user.map(async (item) => {
+                const posts = await this.PostLikeRepository.findAllByDate({d,year,month,day,item})
+                const promises_2 = posts.map(async (item) => {
+                    const targetPosts = await this.PostRepository.findAllBypostId({item})
+                    result.push(targetPosts)
+                })
+            })
+            
+            return result;
+        }
+    }
+
+}   
 
 module.exports = MainService;
