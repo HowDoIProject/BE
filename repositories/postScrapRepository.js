@@ -18,11 +18,11 @@ class PostScrapRepository {
         })
     }
 
-    deleteScrap = async({user_id,post_id}) => {
+    deleteScrap = async(item) => {
         await PostsScraps.destroy({
             where: {
-                user_id: user_id.user_id,
-                post_id,
+                user_id: item["PostsScraps.user_id"],
+                post_id: item["PostsScraps.post_id"],
             },
         })
     }

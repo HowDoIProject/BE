@@ -7,6 +7,6 @@ const scrapsController = new ScrapsController();
 
 router.get("/scrap/:filter/:category/:page", auth, scrapsController.getScrap);
 
-router.delete("/scrap/:filter/:category", auth, scrapsController.deleteScrap);
+router.post("/scrap/:filter/:category", auth, scrapsController.deleteScrap);
 
 module.exports = router;

@@ -289,7 +289,7 @@ class ScrapsService {
         // 게시글 목록 조회
         const list = await this.PostRepository.findAllPostscrapOrderByPostId({user_id})
         list.forEach(async(item) => {
-            await this.PostRepository.deleteScrap({item})
+            await this.PostScrapRepository.deleteScrap(item)
         });
     }
 
@@ -303,9 +303,11 @@ class ScrapsService {
         }
 
         const list = await this.PostRepository.findscrapByCategory({user_id, category})
-
+        console.log(list)
+        
         list.forEach(async(item) => {
-            await this.PostRepository.deleteScrap({item})
+            console.log(item["PostsScraps.user_id"])
+            await this.PostScrapRepository.deleteScrap(item)
         });
     }
 
@@ -319,7 +321,7 @@ class ScrapsService {
         const list = await this.PostRepository.findAllPostscrapOrderByPostId({user_id})
 
         list.forEach(async(item) => {
-            await this.PostRepository.deleteScrap({item})
+            await this.PostScrapRepository.deleteScrap(item)
         });
     }
 
@@ -341,7 +343,7 @@ class ScrapsService {
         const list = await this.PostRepository.findscrapByCategory({user_id, category})
 
         list.forEach(async(item) => {
-            await this.PostRepository.deleteScrap({item})
+            await this.PostScrapRepository.deleteScrap(item)
         });
     }
 }
