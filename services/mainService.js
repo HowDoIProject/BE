@@ -138,7 +138,8 @@ class MainService {
         });
         await Promise.all(promises);
 
-        const total_page = Math.ceil(pages / 10);
+        const total_page = Math.ceil(pages.length / 10);
+        console.log(total_page)
         const last_page = total_page == page ? true : false;
 
         const Result_Json = JSON.stringify(result);
