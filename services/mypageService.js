@@ -2,6 +2,8 @@ const PostRepository = require("../repositories/postRepository")
 const PostLikeRepository = require("../repositories/postLikeRepository")
 const PostScrapRepository = require("../repositories/postScrapRepository")
 const CommentRepository = require("../repositories/commentRepository")
+const jwt = require("jsonwebtoken")
+
 class MypageService {
     constructor() {
         this.PostRepository = new PostRepository();

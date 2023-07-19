@@ -41,7 +41,8 @@ class MypageController {
             
             const result = await this.MypageService.getMyStat({user_id})
             return res.status(200).json(result);
-        }catch(error){
+        }catch(e){
+            console.log(e)
             // 예외 처리
             return res
                 .status(400)

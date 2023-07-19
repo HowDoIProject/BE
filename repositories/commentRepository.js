@@ -43,7 +43,7 @@ class CommentRepository {
             }
         )
     }
-    findAllComment = async() => {
+    findAllComment = async({user_id}) => {
         return await Comments.findAll({
             where: { user_id }
         });

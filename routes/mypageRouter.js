@@ -3,7 +3,7 @@ const router = express.Router();
 const auth = require("../middlewares/auth");
 const { Posts, Users, Comments, PostsLikes, PostsScraps, sequelize } = require("../models");
 const { Op } = require("sequelize");
-const jwt = require("jsonwebtoken")
+
 
 const MypageController = require("../controllers/mypageController")
 const mypageController = new MypageController();
