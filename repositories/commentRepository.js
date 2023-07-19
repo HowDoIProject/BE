@@ -1,4 +1,4 @@
-const { Users, Comments, sequelize } = require("../models");
+const { Users, Comments, sequelize, Posts } = require("../models");
 const { Op } = require("sequelize");
 class CommentRepository {
     constructor() { }
