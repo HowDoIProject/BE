@@ -124,7 +124,6 @@ class CommentRepository {
                 "image",
                 "chosen",
                 [sequelize.col("Post.category"), "category"],
-                [sequelize.col("Post.post_id"), "post_id"],
                 [sequelize.col("Post.title"), "title"],
                 [sequelize.col("Post.like_num"), "like_num"],
                 [sequelize.col("Post.scrap_num"), "scrap_num"],
