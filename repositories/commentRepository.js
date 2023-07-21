@@ -82,10 +82,15 @@ class CommentRepository {
             attributes: [
                 "comment_id",
                 "user_id",
+                [sequelize.col("User.user_type"), "user_type"],
                 "comment",
                 "image",
                 "chosen",
-                [sequelize.col("category"), "category"],
+                [sequelize.col("Post.category"), "category"],
+                [sequelize.col("Post.title"), "title"],
+                [sequelize.col("Post.like_num"), "like_num"],
+                [sequelize.col("Post.scrap_num"), "scrap_num"],
+                [sequelize.col("Post.comment_num"), "comment_num"],
                 "created_at",
                 "updated_at",
             ],
@@ -94,6 +99,13 @@ class CommentRepository {
                 {
                     model: Posts,
                     attributes: [],
+                },
+                {
+                    model: Users,
+                    attributes: [],
+                    where: {
+                        user_id: user_id.user_id,
+                    },
                 },
             ],
             order: [["created_at", "DESC"]],
@@ -105,11 +117,16 @@ class CommentRepository {
             attributes: [
                 "comment_id",
                 "user_id",
+                [sequelize.col("User.user_type"), "user_type"],
                 "post_id",
                 "comment",
                 "image",
                 "chosen",
-                [sequelize.col("category"), "category"],
+                [sequelize.col("Post.category"), "category"],
+                [sequelize.col("Post.title"), "title"],
+                [sequelize.col("Post.like_num"), "like_num"],
+                [sequelize.col("Post.scrap_num"), "scrap_num"],
+                [sequelize.col("Post.comment_num"), "comment_num"],
                 "created_at",
                 "updated_at",
             ],
@@ -117,6 +134,13 @@ class CommentRepository {
             include: [
                 {
                     model: Posts,
+                    attributes: [],
+                    where: {
+                        user_id: user_id.user_id,
+                    },
+                },
+                {
+                    model: Users,
                     attributes: [],
                     where: {
                         user_id: user_id.user_id,
