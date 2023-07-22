@@ -11,7 +11,6 @@ class ScrapsController {
             const { refresh, access } = req.headers;
     
             if (filter === "0" && category === "0") {
-                
                 const result = await this.ScrapsService.getListAll({user_id, access, page})
                 return res.status(200).json(result);
 

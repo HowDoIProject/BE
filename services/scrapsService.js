@@ -12,6 +12,7 @@ class ScrapsService {
     getListAll = async({user_id, access, page}) => {
         // 게시글 목록 조회
         const list = await this.PostRepository.findAllPostscrapByUserId({user_id, page})
+        console.log(list)
         const result = [];
         const promises = list.map(async (item) => {
             let like_check = false;
@@ -36,6 +37,7 @@ class ScrapsService {
                     scrap_check = false;
                 }
             }
+
             const scroll_result = {
                 post_id: item.post_id,
                 user_id: item.user_id,
@@ -55,6 +57,7 @@ class ScrapsService {
             };
             result.push(scroll_result);
         });
+
         await Promise.all(promises);
 
         const total_count = await this.PostRepository.postCount()
@@ -289,7 +292,7 @@ class ScrapsService {
         // 게시글 목록 조회
         const list = await this.PostRepository.findAllPostscrapOrderByPostId({user_id})
         list.forEach(async(item) => {
-            await this.PostScrapRepository.deleteScrap(item)
+            await this.PostScrapRepository.deleteAllScrap(item)
         });
     }
 
@@ -307,7 +310,7 @@ class ScrapsService {
         
         list.forEach(async(item) => {
             console.log(item["PostsScraps.user_id"])
-            await this.PostScrapRepository.deleteScrap(item)
+            await this.PostScrapRepository.deleteAllScrap(item)
         });
     }
 
@@ -321,7 +324,7 @@ class ScrapsService {
         const list = await this.PostRepository.findAllPostscrapOrderByPostId({user_id})
 
         list.forEach(async(item) => {
-            await this.PostScrapRepository.deleteScrap(item)
+            await this.PostScrapRepository.deleteAllScrap(item)
         });
     }
 
@@ -343,7 +346,7 @@ class ScrapsService {
         const list = await this.PostRepository.findscrapByCategory({user_id, category})
 
         list.forEach(async(item) => {
-            await this.PostScrapRepository.deleteScrap(item)
+            await this.PostScrapRepository.deleteAllScrap(item)
         });
     }
 }

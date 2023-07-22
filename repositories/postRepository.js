@@ -485,6 +485,7 @@ class PostRepository {
         });
     }
     findAllPostscrapByUserId = async({user_id, page}) => {
+        console.log(user_id.user_id)
         return await Posts.findAll({
             attributes: [
                 "post_id",
