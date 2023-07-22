@@ -67,7 +67,7 @@ class MypageController {
             console.log(e)
             return res
                 .status(400)
-                .json({ message: "목록 조회에 실패했습니다." + e });
+                .json({ message: "목록 조회에 실패했습니다."});
         }
     }
 
