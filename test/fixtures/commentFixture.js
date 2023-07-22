@@ -92,3 +92,7 @@ exports.MyChosenCommentResultSchema = [
         "updated_at": "2023-07-21T10:06:44.000Z"
     }
 ]
+
+exports.userIdInsertSchema = {
+    user_id: { user_id: 2 }
+}
