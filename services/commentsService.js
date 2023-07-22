@@ -75,7 +75,7 @@ class CommentService {
     ConfirmComment = async ({ post_id }) => {
         const chosen_comments = await this.CommentRepository.findAllCommentById({ post_id })
         if (chosen_comments.length !== 0) {
-            return "이미 채택된 답변이 존재합니다. "
+            return "이미 채택된 답변이 존재합니다."
         }
     }
 

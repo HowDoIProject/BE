@@ -96,3 +96,9 @@ exports.MyChosenCommentResultSchema = [
 exports.userIdInsertSchema = {
     user_id: { user_id: 2 }
 }
+
+exports.postCommentInsertSchema = {
+    post_id: 1,
+    comment: "test",
+    image: "test img"
+}

@@ -91,7 +91,6 @@ class MypageService {
     }
 
     getMyComment = async({user_id}) => {
-        console.log({user_id})
         return await this.CommentRepository.findAllCommentByUserId({user_id})
     }
 

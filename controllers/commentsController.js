@@ -1,6 +1,4 @@
 const CommentService = require("../services/commentsService.js")
-const { Posts, Users, Comments, PostsLikes, sequelize } = require("../models");
-const { Op } = require("sequelize");
 class CommentController {
     constructor() {
         this.CommentService = new CommentService();
@@ -21,10 +19,9 @@ class CommentController {
                 user_id,
                 comment,
                 image,
-            }).then((data) => {
-                return res.status(200).json({
-                    message: "댓글 작성이 완료되었습니다.",
-                });
+            })
+            res.status(200).json({
+                message: "댓글 작성이 완료되었습니다.",
             });
 
         } catch (error) {
@@ -71,6 +68,7 @@ class CommentController {
 
             //게시글, 댓글, 권한 확인
             const message = await this.CommentService.checkComment({ post_id, comment_id, user_id })
+            console.log(message)
             if (message) {
                 return res
                     .status(400)
@@ -81,10 +79,9 @@ class CommentController {
                 comment,
                 image,
                 comment_id
-            }).then((data) => {
-                return res.status(200).json({
-                    message: "댓글 수정이 완료되었습니다.",
-                });
+            })
+            res.status(200).json({
+                message: "댓글 수정이 완료되었습니다.",
             });
         } catch (error) {
             console.log(error);
@@ -108,6 +105,7 @@ class CommentController {
             }
             //채택여부확인
             const chosen_comments = await this.CommentService.ConfirmComment({ post_id })
+            console.log(chosen_comments)
             if (chosen_comments) {
                 return res
                     .status(400)
@@ -116,17 +114,16 @@ class CommentController {
                 await this.CommentService.chooseComment({
                     post_id,
                     comment_id
-                }).then((data) => {
-                    return res.status(200).json({
-                        message: "채택이 완료되었습니다.",
-                    });
+                })
+                res.status(200).json({
+                    message: "채택이 완료되었습니다.",
                 });
             }
         } catch (error) {
             console.log(error);
             return res
                 .status(400)
-                .json({ message: "채택에 실패했습니다." + error });
+                .json({ message: "채택에 실패했습니다."});
         }
     }
     //댓글 도움이되었어요
