@@ -64,7 +64,7 @@ class MypageController {
             return res.status(200).json({ mycomment });
         } catch (e) {
             // 예외 처리
-            console.log(e)
+            // console.log(e)
             return res
                 .status(400)
                 .json({ message: "목록 조회에 실패했습니다."});
@@ -87,7 +87,7 @@ class MypageController {
             // 예외 처리
             return res
                 .status(400)
-                .json({ message: "목록 조회에 실패했습니다." + e });
+                .json({ message: "목록 조회에 실패했습니다."});
         }
     }
 
@@ -106,7 +106,7 @@ class MypageController {
             // 예외 처리
             return res
                 .status(400)
-                .json({ message: "목록 조회에 실패했습니다." + e });
+                .json({ message: "목록 조회에 실패했습니다."});
         }
     }
 }
