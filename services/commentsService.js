@@ -40,11 +40,13 @@ class CommentService {
 
     checkChooseComment = async ({ post_id, comment_id, user_id }) => {
         const targetPost = await this.PostRepository.checkPost({ post_id })
+        
         if (!targetPost) {
             return "유효하지 않은 게시글입니다."
         }
 
         const targetComment = await this.CommentRepository.checkComment({ comment_id })
+        
         if (!targetComment) {
             return "유효하지 않은 댓글입니다."
         }
