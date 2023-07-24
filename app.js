@@ -10,6 +10,8 @@ const http = Server(app);
 app.use(
     cors({
         origin: "*",
+        credentials: true,
+        optionsSuccessStatus: 200,
         methods: "GET, HEAD, POST, PUT, DELETE",
     })
 );
