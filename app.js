@@ -9,7 +9,7 @@ const http = Server(app);
 
 app.use(
     cors({
-        origin: "*",
+        'Access-Control-Allow-Origin': "*",
         credentials: true,
         optionsSuccessStatus: 200,
     })
