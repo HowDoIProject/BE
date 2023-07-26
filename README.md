@@ -2,8 +2,6 @@
 <img src="https://capsule-render.vercel.app/api?type=waving&color=auto&height=200&section=header&text=HowDoI&fontSize=90" />
 </div>
 
-<div align="center">
-</div>
 <div align=center> 
   <img src="https://img.shields.io/badge/javascript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=white">
   <img src="https://img.shields.io/badge/node.js-339933?style=for-the-badge&logo=node.js&logoColor=white">
@@ -25,10 +23,13 @@
   <p align="center>
 
 ## 🐶 서비스 소개
+<div align="center">
+  
 #### 사회초년생이라 이것저것 모르는 게 너무 많나요? 자취 생활 꿀팁이 필요한데 찾기가 귀찮나요?
 #### 엄마 아빠를 포함한 다양한 어른들의 조언을 구하고 싶나요? 그래서 준비했습니다!
 #### HowDoI는 이런 2030세대의 사회초년생 분들이 다양한 부모세대 어른들로부터 
 #### 꿀팁과 조언을 구할 수 있는 플랫폼입니다!
+</div>
 
   ![howdoi](https://github.com/HowDoIProject/BE/assets/124577620/abefe508-efd2-4b55-b114-2b3694b2aa3f)
   
