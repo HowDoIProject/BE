@@ -102,5 +102,6 @@
 </details>
 
 ## 🐶 서비스 아키택쳐
+![아키텍처](https://github.com/HowDoIProject/BE/assets/124577620/6fd02b31-7048-44f9-bd27-998f858a72c3)
 
 
