@@ -11,7 +11,8 @@ module.exports = (sequelize, DataTypes) => {
             // define association here
             this.belongsTo(models.Users, {
                 targetKey: 'user_id',
-                foreignKey: 'user_id'
+                foreignKey: 'user_id',
+                onDelete : "CASCADE"
             }),
             this.hasMany(models.Comments, {
                 targetKey: 'post_id',
