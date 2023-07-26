@@ -1,4 +1,5 @@
 const { PostsLikes } = require("../models");
+const { Op } = require("sequelize");
 class PostLikeRepository {
     constructor() { }
 
