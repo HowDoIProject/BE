@@ -40,7 +40,17 @@ module.exports = (sequelize, DataTypes) => {
             comment_id: {
                 allowNull: true,
                 type: Sequelize.INTEGER,
-            }
+            },
+            created_at: {
+                allowNull: false,
+                type: Sequelize.DATE,
+                defaultValue: Sequelize.fn("now"),
+            },
+            updated_at: {
+                allowNull: false,
+                type: Sequelize.DATE,
+                defaultValue: Sequelize.fn("now"),
+            },
         },
         {
             sequelize,
