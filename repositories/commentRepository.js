@@ -9,7 +9,7 @@ class CommentRepository {
         comment,
         image,
     }) => {
-        Comments.create({
+        await Comments.create({
             post_id,
             user_id,
             comment,
