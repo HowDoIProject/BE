@@ -91,7 +91,7 @@ class PostRepository {
                     },
                     {
                         created_at: {
-                            [Op.gte]: new Date(year, month, day - 6),
+                            [Op.gte]: new Date(year, month-1, day),
                         },
                     },
                 ],
@@ -133,7 +133,7 @@ class PostRepository {
                     },
                     {
                         created_at: {
-                            [Op.gte]: new Date(year, month, day - 6),
+                            [Op.gte]: new Date(year, month-1, day),
                         },
                     },
                 ],
